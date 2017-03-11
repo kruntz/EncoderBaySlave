@@ -50,7 +50,6 @@
 #include <xc.h>
 #include "tmr0.h"
 #include "pin_manager.h"
-#include "i2c1.h"
 
 /**
   Section: TMR0 APIs
@@ -67,8 +66,8 @@ void TMR0_Initialize(void) {
     // T0CS FOSC/4; T0CKPS 1:32; T0ASYNC synchronised;
     T0CON1 = 0x45;
 
-    // TMR0H 255;
-    TMR0H = 0xFF;
+    // TMR0H 249; 
+    TMR0H = 0xF9;
 
     // TMR0L 0;
     TMR0L = 0x00;
@@ -132,12 +131,6 @@ void TMR0_SetInterruptHandler(void* InterruptHandler) {
 void TMR0_DefaultInterruptHandler(void) {
     // add your TMR0 interrupt custom code
     // or set custom function using TMR0_SetInterruptHandler()
-    IO_RB4_Toggle();
-    IO_RB5_SetHigh();
-    uint8_t testByte[2] = {0xaa, 0x55};
-    I2C1_MESSAGE_STATUS status;
-    I2C1_MasterWrite(testByte, 2, 0x3e, &status);
-    IO_RB5_SetLow();
 }
 
 /**

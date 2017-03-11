@@ -45,6 +45,54 @@
 
 #include "mcc_generated_files/mcc.h"
 
+int8_t buttonState = 0;
+int8_t encoderSteps = 0;
+uint8_t encoderPeriod = 0;
+
+void TMR0_EncoderInterruptHandler(void) {
+    IO_RB4_Toggle();
+//    IO_RB5_SetHigh();
+    
+    // ---------- Read button state
+    static int8_t buttonStates[] = {0,0,0,1,-1,0,0,0};
+    static uint8_t oldButtonState = 0;
+    
+    // Remember previous state
+    oldButtonState <<= 1;
+    // Add actual state
+    oldButtonState |= ENC_00_P_GetValue();
+    // Indexed state (de-bounce with at least two consecutive identical states)
+    buttonState = buttonStates[(oldButtonState & 0x07)];
+    
+    // ---------- Read encoder state
+    static int8_t encoderStates[] = {0,-1,1,0,1,0,0,-1,-1,0,0,1,0,1,-1,0};
+    static uint8_t oldEncoderState = 0;
+
+    // Remember previous state
+    oldEncoderState <<= 2;
+    // Add actual state
+    oldEncoderState |= (ENC_00_B_GetValue());
+    oldEncoderState |= (ENC_00_A_GetValue() << 1);
+    // Indexed state (de-bounce with at least two consecutive identical states)
+    encoderSteps += encoderStates[(oldEncoderState & 0x0f)];
+    if (encoderPeriod < UINT8_MAX) {
+        encoderPeriod++;
+    }
+    
+    int i;
+    for (i = 0; i < (encoderSteps<0 ? (-encoderSteps) : encoderSteps); i++) {
+        IO_RB5_SetHigh();
+        Nop();
+        Nop();
+        Nop();
+        IO_RB5_SetLow();
+        Nop();
+        Nop();
+        Nop();
+    }
+//    IO_RB5_SetLow();
+}
+
 /*
                          Main application
  */
@@ -52,6 +100,8 @@ void main(void) {
     // Initialize the device
     SYSTEM_Initialize();
 
+    TMR0_SetInterruptHandler(TMR0_EncoderInterruptHandler);
+    
     // If using interrupts in PIC18 High/Low Priority Mode you need to enable the Global High and Low Interrupts
     // If using interrupts in PIC Mid-Range Compatibility Mode you need to enable the Global and Peripheral Interrupts
     // Use the following macros to:
@@ -80,8 +130,33 @@ void main(void) {
     // Disable the Peripheral Interrupts
     //INTERRUPT_PeripheralInterruptDisable();
 
+    uint8_t testByte[2] = {0xaa, 0x55};
+    I2C1_MESSAGE_STATUS status;
     while (1) {
-        // Add your application code
+//        if (I2C1_MasterQueueIsEmpty() && buttonState != 0) {
+//            I2C1_MasterWrite(testByte, 2, 0x10 + buttonState, &status);
+//            buttonState = 0;
+//        }
+        if (I2C1_MasterQueueIsEmpty() && encoderSteps != 0) {
+            if (encoderSteps >= 4) {
+                encoderSteps -= 4;
+                if (encoderPeriod < 150u) {
+                    I2C1_MasterWrite(testByte, 2, 0x09, &status);
+                } else {
+                    I2C1_MasterWrite(testByte, 2, 0x08, &status);
+                }
+                encoderPeriod = 0;
+            }
+            if (encoderSteps <= -4) {
+                encoderSteps += 4;
+                if (encoderPeriod < 150u) {
+                    I2C1_MasterWrite(testByte, 2, 0x01, &status);
+                } else {
+                    I2C1_MasterWrite(testByte, 2, 0x00, &status);
+                }
+                encoderPeriod = 0;
+            }
+        }
     }
 }
 /**
