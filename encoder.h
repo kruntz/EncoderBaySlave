@@ -1,6 +1,8 @@
 #ifndef ENCODER_H
 #define	ENCODER_H
 
+#define SPEEDY_INTERVAL 150u
+
 /**
  * @Param
     none

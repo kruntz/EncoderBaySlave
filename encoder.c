@@ -2,6 +2,7 @@
 #include "encoder.h"
 
 /*
+ * Quadrature encoder transition table
 Transition  Valid?  Move
 00  0000	No      0
 01  0001	CCW    -1
@@ -81,19 +82,19 @@ void DecodePushEncoder(void) {
     if (I2C1_MasterQueueIsEmpty() && encoderSteps != 0) {
         if (encoderSteps >= 4) {
             encoderSteps -= 4;
-            if (encoderPeriod < 150u) {
-                I2C1_MasterWrite(testByte, 2, 0x09, &status);
+            if (encoderPeriod < SPEEDY_INTERVAL) {
+//                I2C1_MasterWrite(testByte, 2, 0x09, &status);
             } else {
-                I2C1_MasterWrite(testByte, 2, 0x08, &status);
+//                I2C1_MasterWrite(testByte, 2, 0x08, &status);
             }
             encoderPeriod = 0;
         }
         if (encoderSteps <= -4) {
             encoderSteps += 4;
-            if (encoderPeriod < 150u) {
-                I2C1_MasterWrite(testByte, 2, 0x01, &status);
+            if (encoderPeriod < SPEEDY_INTERVAL) {
+//                I2C1_MasterWrite(testByte, 2, 0x01, &status);
             } else {
-                I2C1_MasterWrite(testByte, 2, 0x00, &status);
+//                I2C1_MasterWrite(testByte, 2, 0x00, &status);
             }
             encoderPeriod = 0;
         }

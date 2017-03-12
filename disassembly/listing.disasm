@@ -1,0 +1,2879 @@
+Disassembly Listing for EncoderBaySlave
+Generated From:
+/home/kruntz/Work/oltreNoi/MPLABXProjects/EncoderBaySlave.X/dist/default/production/EncoderBaySlave.X.production.elf
+Mar 11, 2017 8:19:10 PM
+
+---  /home/kruntz/Work/oltreNoi/MPLABXProjects/EncoderBaySlave.X/mcc_generated_files/tmr0.c  ------------
+1:             /**
+2:               TMR0 Generated Driver File
+3:             
+4:               @Company
+5:                 Microchip Technology Inc.
+6:             
+7:               @File Name
+8:                 tmr0.c
+9:             
+10:              @Summary
+11:                This is the generated driver implementation file for the TMR0 driver using MPLAB(c) Code Configurator
+12:            
+13:              @Description
+14:                This source file provides APIs for TMR0.
+15:                Generation Information :
+16:                    Product Revision  :  MPLAB(c) Code Configurator - 4.15
+17:                    Device            :  PIC18F46K40
+18:                    Driver Version    :  2.00
+19:                The generated drivers are tested against the following:
+20:                    Compiler          :  XC8 1.35
+21:                    MPLAB             :  MPLAB X 3.40
+22:             */
+23:            
+24:            /*
+25:                (c) 2016 Microchip Technology Inc. and its subsidiaries. You may use this
+26:                software and any derivatives exclusively with Microchip products.
+27:            
+28:                THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
+29:                EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY IMPLIED
+30:                WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS FOR A
+31:                PARTICULAR PURPOSE, OR ITS INTERACTION WITH MICROCHIP PRODUCTS, COMBINATION
+32:                WITH ANY OTHER PRODUCTS, OR USE IN ANY APPLICATION.
+33:            
+34:                IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE,
+35:                INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND
+36:                WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP HAS
+37:                BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE. TO THE
+38:                FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL CLAIMS IN
+39:                ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT OF FEES, IF ANY,
+40:                THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
+41:            
+42:                MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE
+43:                TERMS.
+44:             */
+45:            
+46:            /**
+47:              Section: Included Files
+48:             */
+49:            
+50:            #include <xc.h>
+51:            #include "tmr0.h"
+52:            #include "pin_manager.h"
+53:            
+54:            /**
+55:              Section: TMR0 APIs
+56:             */
+57:            
+58:            void (*TMR0_InterruptHandler)(void);
+59:            
+60:            void TMR0_Initialize(void) {
+61:                // Set TMR0 to the options selected in the User Interface
+62:            
+63:                // T0OUTPS 1:1; T0EN disabled; T016BIT 8-bit;
+64:                T0CON0 = 0x00;
+0956  0E00     MOVLW 0x0
+0958  6ED5     MOVWF T0CON0, ACCESS
+65:            
+66:                // T0CS FOSC/4; T0CKPS 1:32; T0ASYNC synchronised;
+67:                T0CON1 = 0x45;
+095A  0E45     MOVLW 0x45
+095C  6ED6     MOVWF T0CON1, ACCESS
+68:            
+69:                // TMR0H 249; 
+70:                TMR0H = 0xF9;
+095E  0EF9     MOVLW 0xF9
+0960  6ED4     MOVWF TMR0H, ACCESS
+71:            
+72:                // TMR0L 0;
+73:                TMR0L = 0x00;
+0962  0E00     MOVLW 0x0
+0964  6ED3     MOVWF TMR0L, ACCESS
+74:            
+75:                // Clear Interrupt flag before enabling the interrupt
+76:                PIR0bits.TMR0IF = 0;
+0966  010E     MOVLB 0xE
+0968  9BCA     BCF 0xCA, 5, BANKED
+77:            
+78:                // Enabling TMR0 interrupt.
+79:                PIE0bits.TMR0IE = 1;
+096A  010E     MOVLB 0xE
+096C  8BC2     BSF 0xC2, 5, BANKED
+80:            
+81:                // Set Default Interrupt Handler
+82:                TMR0_SetInterruptHandler(TMR0_DefaultInterruptHandler);
+096E  0E70     MOVLW 0x70
+0970  0100     MOVLB 0x0
+0972  6FF0     MOVWF __pcstackBANK0, BANKED
+0974  0E0A     MOVLW 0xA
+0976  0100     MOVLB 0x0
+0978  6FF1     MOVWF 0xF1, BANKED
+097A  EC2F     CALL 0xA5E, 0
+097C  F005     NOP
+83:            
+84:                // Start TMR0
+85:                TMR0_StartTimer();
+097E  EC34     CALL 0xA68, 0
+0980  F005     NOP
+86:            }
+0982  0012     RETURN 0
+87:            
+88:            void TMR0_StartTimer(void) {
+89:                // Start the Timer by writing to TMR0ON bit
+90:                T0CON0bits.T0EN = 1;
+0A68  8ED5     BSF T0CON0, 7, ACCESS
+91:            }
+0A6A  0012     RETURN 0
+92:            
+93:            void TMR0_StopTimer(void) {
+94:                // Stop the Timer by writing to TMR0ON bit
+95:                T0CON0bits.T0EN = 0;
+96:            }
+97:            
+98:            uint8_t TMR0_Read8bitTimer(void) {
+99:                uint8_t readVal;
+100:           
+101:               // read Timer0, low register only
+102:               readVal = TMR0L;
+103:           
+104:               return readVal;
+105:           }
+106:           
+107:           void TMR0_Write8bitTimer(uint8_t timerVal) {
+108:               // Write to Timer0 registers, low register only
+109:               TMR0L = timerVal;
+110:           }
+111:           
+112:           void TMR0_Load8bitPeriod(uint8_t periodVal) {
+113:               // Write to Timer0 registers, high register only
+114:               TMR0H = periodVal;
+115:           }
+116:           
+117:           void TMR0_ISR(void) {
+118:               // clear the TMR0 interrupt flag
+119:               PIR0bits.TMR0IF = 0;
+09B2  010E     MOVLB 0xE
+09B4  9BCA     BCF 0xCA, 5, BANKED
+120:               if (TMR0_InterruptHandler) {
+09B6  5049     MOVF TMR0_InterruptHandler, W, ACCESS
+09B8  104A     IORWF 0x4A, W, ACCESS
+09BA  B4D8     BTFSC STATUS, 2, ACCESS
+09BC  0012     RETURN 0
+121:                   TMR0_InterruptHandler();
+09BE  D801     RCALL 0x9C2
+09C0  0012     RETURN 0
+09C2  0005     PUSH
+09C4  6EFA     MOVWF PCLATH, ACCESS
+09C6  5049     MOVF TMR0_InterruptHandler, W, ACCESS
+09C8  6EFD     MOVWF TOS, ACCESS
+09CA  504A     MOVF 0x4A, W, ACCESS
+09CC  6EFE     MOVWF TOSH, ACCESS
+09CE  50F8     MOVF TBLPTRU, W, ACCESS
+09D0  6EFF     MOVWF TOSU, ACCESS
+09D2  50FA     MOVF PCLATH, W, ACCESS
+09D4  0012     RETURN 0
+122:               }
+123:           
+124:               // add your TMR0 interrupt custom code
+125:           }
+126:           
+127:           void TMR0_SetInterruptHandler(void* InterruptHandler) {
+128:               TMR0_InterruptHandler = InterruptHandler;
+0A5E  C0F0     MOVFF __pcstackBANK0, TMR0_InterruptHandler
+0A60  F049     NOP
+0A62  C0F1     MOVFF 0xF1, 0x4A
+0A64  F04A     NOP
+129:           }
+0A66  0012     RETURN 0
+130:           
+131:           void TMR0_DefaultInterruptHandler(void) {
+132:               // add your TMR0 interrupt custom code
+133:               // or set custom function using TMR0_SetInterruptHandler()
+134:           }
+0A70  0012     RETURN 0
+135:           
+136:           /**
+137:             End of File
+138:            */
+---  /home/kruntz/Work/oltreNoi/MPLABXProjects/EncoderBaySlave.X/mcc_generated_files/pin_manager.c  -----
+1:             /**
+2:               Generated Pin Manager File
+3:             
+4:               Company:
+5:                 Microchip Technology Inc.
+6:             
+7:               File Name:
+8:                 pin_manager.c
+9:             
+10:              Summary:
+11:                This is the Pin Manager file generated using MPLAB(c) Code Configurator
+12:            
+13:              Description:
+14:                This header file provides implementations for pin APIs for all pins selected in the GUI.
+15:                Generation Information :
+16:                    Product Revision  :  MPLAB(c) Code Configurator - 4.15
+17:                    Device            :  PIC18F46K40
+18:                    Driver Version    :  1.02
+19:                The generated drivers are tested against the following:
+20:                    Compiler          :  XC8 1.35
+21:                    MPLAB             :  MPLAB X 3.40
+22:            
+23:                Copyright (c) 2013 - 2015 released Microchip Technology Inc.  All rights reserved.
+24:            
+25:                Microchip licenses to you the right to use, modify, copy and distribute
+26:                Software only when embedded on a Microchip microcontroller or digital signal
+27:                controller that is integrated into your product or third party product
+28:                (pursuant to the sublicense terms in the accompanying license agreement).
+29:            
+30:                You should refer to the license agreement accompanying this Software for
+31:                additional information regarding your rights and obligations.
+32:            
+33:                SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
+34:                EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF
+35:                MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE.
+36:                IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE LIABLE OR OBLIGATED UNDER
+37:                CONTRACT, NEGLIGENCE, STRICT LIABILITY, CONTRIBUTION, BREACH OF WARRANTY, OR
+38:                OTHER LEGAL EQUITABLE THEORY ANY DIRECT OR INDIRECT DAMAGES OR EXPENSES
+39:                INCLUDING BUT NOT LIMITED TO ANY INCIDENTAL, SPECIAL, INDIRECT, PUNITIVE OR
+40:                CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST OF PROCUREMENT OF
+41:                SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
+42:                (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
+43:            
+44:            */
+45:            
+46:            #include <xc.h>
+47:            #include "pin_manager.h"
+48:            #include "stdbool.h"
+49:            
+50:            
+51:            void PIN_MANAGER_Initialize(void)
+52:            {
+53:                /**
+54:                LATx registers
+55:                */   
+56:                LATE = 0x00;    
+0410  0E00     MOVLW 0x0
+0412  6E87     MOVWF LATE, ACCESS
+57:                LATD = 0x00;    
+0414  0E00     MOVLW 0x0
+0416  6E86     MOVWF LATD, ACCESS
+58:                LATA = 0x00;    
+0418  0E00     MOVLW 0x0
+041A  6E83     MOVWF LATA, ACCESS
+59:                LATB = 0x00;    
+041C  0E00     MOVLW 0x0
+041E  6E84     MOVWF LATB, ACCESS
+60:                LATC = 0x00;    
+0420  0E00     MOVLW 0x0
+0422  6E85     MOVWF LATC, ACCESS
+61:            
+62:                /**
+63:                TRISx registers
+64:                */    
+65:                TRISE = 0x07;
+0424  0E07     MOVLW 0x7
+0426  6E8C     MOVWF TRISE, ACCESS
+66:                TRISA = 0xFF;
+0428  6888     SETF TRISA, ACCESS
+67:                TRISB = 0xCF;
+042A  0ECF     MOVLW 0xCF
+042C  6E89     MOVWF TRISB, ACCESS
+68:                TRISC = 0xFF;
+042E  688A     SETF TRISC, ACCESS
+69:                TRISD = 0xFF;
+0430  688B     SETF TRISD, ACCESS
+70:            
+71:                /**
+72:                ANSELx registers
+73:                */   
+74:                ANSELC = 0x00;
+0432  0E00     MOVLW 0x0
+0434  010F     MOVLB 0xF
+0436  6F21     MOVWF 0x21, BANKED
+75:                ANSELB = 0xC0;
+0438  0EC0     MOVLW 0xC0
+043A  010F     MOVLB 0xF
+043C  6F19     MOVWF 0x19, BANKED
+76:                ANSELD = 0x00;
+043E  0E00     MOVLW 0x0
+0440  010F     MOVLB 0xF
+0442  6F26     MOVWF 0x26, BANKED
+77:                ANSELE = 0x07;
+0444  0E07     MOVLW 0x7
+0446  010F     MOVLB 0xF
+0448  6F2E     MOVWF 0x2E, BANKED
+78:                ANSELA = 0x00;
+044A  0E00     MOVLW 0x0
+044C  010F     MOVLB 0xF
+044E  6F11     MOVWF encoderSteps, BANKED
+79:            
+80:                /**
+81:                WPUx registers
+82:                */ 
+83:                WPUD = 0xFF;
+0450  010F     MOVLB 0xF
+0452  6925     SETF 0x25, BANKED
+84:                WPUE = 0x00;
+0454  0E00     MOVLW 0x0
+0456  010F     MOVLB 0xF
+0458  6F2D     MOVWF 0x2D, BANKED
+85:                WPUB = 0x0F;
+045A  0E0F     MOVLW 0xF
+045C  010F     MOVLB 0xF
+045E  6F18     MOVWF eepromAddress, BANKED
+86:                WPUA = 0x00;
+0460  0E00     MOVLW 0x0
+0462  010F     MOVLB 0xF
+0464  6F10     MOVWF encoderPeriod, BANKED
+87:                WPUC = 0xFF;
+0466  010F     MOVLB 0xF
+0468  6920     SETF 0x20, BANKED
+88:            
+89:                /**
+90:                ODx registers
+91:                */   
+92:                ODCONE = 0x00;
+046A  0E00     MOVLW 0x0
+046C  010F     MOVLB 0xF
+046E  6F2C     MOVWF completion_code, BANKED
+93:                ODCONA = 0x00;
+0470  0E00     MOVLW 0x0
+0472  010F     MOVLB 0xF
+0474  6F0F     MOVWF oldButtonState, BANKED
+94:                ODCONB = 0x00;
+0476  0E00     MOVLW 0x0
+0478  010F     MOVLB 0xF
+047A  6F17     MOVWF slaveWriteType, BANKED
+95:                ODCONC = 0x00;
+047C  0E00     MOVLW 0x0
+047E  010F     MOVLB 0xF
+0480  6F1F     MOVWF 0x1F, BANKED
+96:                ODCOND = 0x00;
+0482  0E00     MOVLW 0x0
+0484  010F     MOVLB 0xF
+0486  6F24     MOVWF 0x24, BANKED
+97:                
+98:            
+99:            
+100:              
+101:               
+102:               
+103:               bool state = GIE;
+0488  0E00     MOVLW 0x0
+048A  BEF2     BTFSC INTCON, 7, ACCESS
+048C  0E01     MOVLW 0x1
+048E  0100     MOVLB 0x0
+0490  6FF0     MOVWF __pcstackBANK0, BANKED
+104:               GIE = 0;
+0492  9EF2     BCF INTCON, 7, ACCESS
+105:               PPSLOCK = 0x55;
+0494  0E55     MOVLW 0x55
+0496  010E     MOVLB 0xE
+0498  6FA0     MOVWF 0xA0, BANKED
+106:               PPSLOCK = 0xAA;
+049A  0EAA     MOVLW 0xAA
+049C  010E     MOVLB 0xE
+049E  6FA0     MOVWF 0xA0, BANKED
+107:               PPSLOCKbits.PPSLOCKED = 0x00; // unlock PPS
+04A0  010E     MOVLB 0xE
+04A2  91A0     BCF 0xA0, 0, BANKED
+108:           
+109:               RB1PPS = 0x10;   //RB1->MSSP1:SDA1;
+04A4  0E10     MOVLW 0x10
+04A6  010E     MOVLB 0xE
+04A8  6FF0     MOVWF __pcstackBANK0, BANKED
+110:               SSP2CLKPPSbits.SSPCLKPPS = 0x0A;   //RB2->MSSP2:SCL2;
+04AA  010E     MOVLB 0xE
+04AC  918F     BCF 0x8F, 0, BANKED
+04AE  838F     BSF 0x8F, 1, BANKED
+04B0  958F     BCF 0x8F, 2, BANKED
+04B2  878F     BSF 0x8F, 3, BANKED
+04B4  998F     BCF 0x8F, 4, BANKED
+111:               SSP2DATPPSbits.SSPDATPPS = 0x0B;   //RB3->MSSP2:SDA2;
+04B6  010E     MOVLB 0xE
+04B8  8190     BSF 0x90, 0, BANKED
+04BA  8390     BSF 0x90, 1, BANKED
+04BC  9590     BCF 0x90, 2, BANKED
+04BE  8790     BSF 0x90, 3, BANKED
+04C0  9990     BCF 0x90, 4, BANKED
+112:               RB0PPS = 0x0F;   //RB0->MSSP1:SCL1;
+04C2  0E0F     MOVLW 0xF
+04C4  010E     MOVLB 0xE
+04C6  6FEF     MOVWF 0xEF, BANKED
+113:               RB2PPS = 0x11;   //RB2->MSSP2:SCL2;
+04C8  0E11     MOVLW 0x11
+04CA  010E     MOVLB 0xE
+04CC  6FF1     MOVWF 0xF1, BANKED
+114:               RB3PPS = 0x12;   //RB3->MSSP2:SDA2;
+04CE  0E12     MOVLW 0x12
+04D0  010E     MOVLB 0xE
+04D2  6FF2     MOVWF pflag, BANKED
+115:               SSP1CLKPPSbits.SSPCLKPPS = 0x08;   //RB0->MSSP1:SCL1;
+04D4  010E     MOVLB 0xE
+04D6  91B7     BCF 0xB7, 0, BANKED
+04D8  93B7     BCF 0xB7, 1, BANKED
+04DA  95B7     BCF 0xB7, 2, BANKED
+04DC  87B7     BSF 0xB7, 3, BANKED
+04DE  99B7     BCF 0xB7, 4, BANKED
+116:               SSP1DATPPSbits.SSPDATPPS = 0x09;   //RB1->MSSP1:SDA1;
+04E0  010E     MOVLB 0xE
+04E2  81B8     BSF 0xB8, 0, BANKED
+04E4  93B8     BCF 0xB8, 1, BANKED
+04E6  95B8     BCF 0xB8, 2, BANKED
+04E8  87B8     BSF 0xB8, 3, BANKED
+04EA  99B8     BCF 0xB8, 4, BANKED
+117:           
+118:               PPSLOCK = 0x55;
+04EC  0E55     MOVLW 0x55
+04EE  010E     MOVLB 0xE
+04F0  6FA0     MOVWF 0xA0, BANKED
+119:               PPSLOCK = 0xAA;
+04F2  0EAA     MOVLW 0xAA
+04F4  010E     MOVLB 0xE
+04F6  6FA0     MOVWF 0xA0, BANKED
+120:               PPSLOCKbits.PPSLOCKED = 0x01; // lock PPS
+04F8  010E     MOVLB 0xE
+04FA  81A0     BSF 0xA0, 0, BANKED
+121:           
+122:               GIE = state;
+04FC  0100     MOVLB 0x0
+04FE  A1F0     BTFSS __pcstackBANK0, 0, BANKED
+0500  D002     BRA 0x506
+0502  8EF2     BSF INTCON, 7, ACCESS
+0504  0012     RETURN 0
+0506  9EF2     BCF INTCON, 7, ACCESS
+123:           }       
+0508  0012     RETURN 0
+124:           
+125:           void PIN_MANAGER_IOC(void)
+126:           {   
+127:           
+128:           }
+129:           
+130:           /**
+131:            End of File
+132:           */
+---  /home/kruntz/Work/oltreNoi/MPLABXProjects/EncoderBaySlave.X/mcc_generated_files/mcc.c  -------------
+1:             /**
+2:               @Generated MPLAB(c) Code Configurator Source File
+3:             
+4:               @Company:
+5:                 Microchip Technology Inc.
+6:             
+7:               @File Name:
+8:                 mcc.c
+9:             
+10:              @Summary:
+11:                This is the mcc.c file generated using MPLAB(c) Code Configurator
+12:            
+13:              @Description:
+14:                This header file provides implementations for driver APIs for all modules selected in the GUI.
+15:                Generation Information :
+16:                    Product Revision  :  MPLAB(c) Code Configurator - 4.15
+17:                    Device            :  PIC18F46K40
+18:                    Driver Version    :  1.02
+19:                The generated drivers are tested against the following:
+20:                    Compiler          :  XC8 1.35
+21:                    MPLAB             :  MPLAB X 3.40
+22:            */
+23:            
+24:            /*
+25:                (c) 2016 Microchip Technology Inc. and its subsidiaries. You may use this
+26:                software and any derivatives exclusively with Microchip products.
+27:            
+28:                THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
+29:                EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY IMPLIED
+30:                WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS FOR A
+31:                PARTICULAR PURPOSE, OR ITS INTERACTION WITH MICROCHIP PRODUCTS, COMBINATION
+32:                WITH ANY OTHER PRODUCTS, OR USE IN ANY APPLICATION.
+33:            
+34:                IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE,
+35:                INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND
+36:                WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP HAS
+37:                BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE. TO THE
+38:                FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL CLAIMS IN
+39:                ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT OF FEES, IF ANY,
+40:                THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
+41:            
+42:                MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE
+43:                TERMS.
+44:            */
+45:            
+46:            // Configuration bits: selected in the GUI
+47:            
+48:            // CONFIG1L
+49:            #pragma config FEXTOSC = OFF    // ->Oscillator not enabled
+50:            #pragma config RSTOSC = HFINTOSC_64MHZ    // ->HFINTOSC with HFFRQ = 64 MHz and CDIV = 1:1
+51:            
+52:            // CONFIG1H
+53:            #pragma config CLKOUTEN = OFF    // ->CLKOUT function is disabled
+54:            #pragma config CSWEN = ON    // ->Writing to NOSC and NDIV is allowed
+55:            #pragma config FCMEN = ON    // Fail-Safe Clock Monitor Enable bit->Fail-Safe Clock Monitor enabled
+56:            
+57:            // CONFIG2L
+58:            #pragma config MCLRE = EXTMCLR    // ->If LVP = 0, MCLR pin is MCLR; If LVP = 1, RE3 pin function is MCLR 
+59:            #pragma config PWRTE = OFF    // Power-up Timer Enable bit->Power up timer disabled
+60:            #pragma config LPBOREN = OFF    // ->ULPBOR disabled
+61:            #pragma config BOREN = SBORDIS    // Brown-out Reset Enable bits->Brown-out Reset enabled , SBOREN bit is ignored
+62:            
+63:            // CONFIG2H
+64:            #pragma config BORV = VBOR_2P45    // Brown Out Reset Voltage selection bits->Brown-out Reset Voltage (VBOR) set to 2.45V
+65:            #pragma config ZCD = OFF    // ZCD Disable bit->ZCD disabled. ZCD can be enabled by setting the ZCDSEN bit of ZCDCON
+66:            #pragma config PPS1WAY = ON    // PPSLOCK bit One-Way Set Enable bit->PPSLOCK bit can be cleared and set only once; PPS registers remain locked after one clear/set cycle
+67:            #pragma config STVREN = ON    // Stack Full/Underflow Reset Enable bit->Stack full/underflow will cause Reset
+68:            #pragma config DEBUG = OFF    // Debugger Enable bit->Background debugger disabled
+69:            #pragma config XINST = OFF    // Extended Instruction Set Enable bit->Extended Instruction Set and Indexed Addressing Mode disabled
+70:            
+71:            // CONFIG3L
+72:            #pragma config WDTCPS = WDTCPS_31    // ->Divider ratio 1:65536; software control of WDTPS
+73:            #pragma config WDTE = OFF    // WDT operating mode->WDT Disabled
+74:            
+75:            // CONFIG3H
+76:            #pragma config WDTCWS = WDTCWS_7    // WDT Window Select bits->window always open (100%); software control; keyed access not required
+77:            #pragma config WDTCCS = SC    // WDT input clock selector->Software Control
+78:            
+79:            // CONFIG4L
+80:            #pragma config WRT0 = OFF    // Write Protection Block 0->Block 0 (000800-003FFFh) not write-protected
+81:            #pragma config WRT1 = OFF    // Write Protection Block 1->Block 1 (004000-007FFFh) not write-protected
+82:            #pragma config WRT2 = OFF    // Write Protection Block 2->Block 2 (008000-00BFFFh) not write-protected
+83:            #pragma config WRT3 = OFF    // Write Protection Block 3->Block 3 (00C000-00FFFFh) not write-protected
+84:            
+85:            // CONFIG4H
+86:            #pragma config WRTC = OFF    // Configuration Register Write Protection bit->Configuration registers (300000-30000Bh) not write-protected
+87:            #pragma config WRTB = OFF    // Boot Block Write Protection bit->Boot Block (000000-0007FFh) not write-protected
+88:            #pragma config WRTD = OFF    // Data EEPROM Write Protection bit->Data EEPROM not write-protected
+89:            #pragma config SCANE = ON    // ->Scanner module is available for use, SCANMD bit can control the module
+90:            #pragma config LVP = ON    // Low Voltage Programming Enable bit->Low voltage programming enabled. MCLR/VPP pin function is MCLR. MCLRE configuration bit is ignored
+91:            
+92:            // CONFIG5L
+93:            #pragma config CP = OFF    // UserNVM Program Memory Code Protection bit->UserNVM code protection disabled
+94:            #pragma config CPD = OFF    // DataNVM Memory Code Protection bit->DataNVM code protection disabled
+95:            
+96:            // CONFIG6L
+97:            #pragma config EBTR0 = OFF    // Table Read Protection Block 0->Block 0 (000800-003FFFh) not protected from table reads executed in other blocks
+98:            #pragma config EBTR1 = OFF    // Table Read Protection Block 1->Block 1 (004000-007FFFh) not protected from table reads executed in other blocks
+99:            #pragma config EBTR2 = OFF    // Table Read Protection Block 2->Block 2 (008000-00BFFFh) not protected from table reads executed in other blocks
+100:           #pragma config EBTR3 = OFF    // Table Read Protection Block 3->Block 3 (00C000-00FFFFh) not protected from table reads executed in other blocks
+101:           
+102:           // CONFIG6H
+103:           #pragma config EBTRB = OFF    // Boot Block Table Read Protection bit->Boot Block (000000-0007FFh) not protected from table reads executed in other blocks
+104:           
+105:           #include "mcc.h"
+106:           
+107:           void SYSTEM_Initialize(void)
+108:           {
+109:           
+110:               INTERRUPT_Initialize();
+0A14  EC36     CALL 0xA6C, 0
+0A16  F005     NOP
+111:               PIN_MANAGER_Initialize();
+0A18  EC08     CALL 0x410, 0
+0A1A  F002     NOP
+112:               OSCILLATOR_Initialize();
+0A1C  ECEB     CALL 0x9D6, 0
+0A1E  F004     NOP
+113:               I2C1_Initialize();
+0A20  EC92     CALL 0x924, 0
+0A22  F004     NOP
+114:               I2C2_Initialize();
+0A24  ECC2     CALL 0x984, 0
+0A26  F004     NOP
+115:               TMR0_Initialize();
+0A28  ECAB     CALL 0x956, 0
+0A2A  F004     NOP
+116:           }
+0A2C  0012     RETURN 0
+117:           
+118:           void OSCILLATOR_Initialize(void)
+119:           {
+120:               // NOSC HFINTOSC; NDIV 1; 
+121:               OSCCON1 = 0x60;
+09D6  0E60     MOVLW 0x60
+09D8  010E     MOVLB 0xE
+09DA  6FD8     MOVWF 0xD8, BANKED
+122:               // CSWHOLD may proceed; SOSCPWR Low power; 
+123:               OSCCON3 = 0x00;
+09DC  0E00     MOVLW 0x0
+09DE  010E     MOVLB 0xE
+09E0  6FDA     MOVWF 0xDA, BANKED
+124:               // MFOEN disabled; LFOEN disabled; ADOEN disabled; SOSCEN disabled; EXTOEN disabled; HFOEN disabled; 
+125:               OSCEN = 0x00;
+09E2  0E00     MOVLW 0x0
+09E4  010E     MOVLB 0xE
+09E6  6FDC     MOVWF 0xDC, BANKED
+126:               // HFFRQ 64_MHz; 
+127:               OSCFRQ = 0x08;
+09E8  0E08     MOVLW 0x8
+09EA  010E     MOVLB 0xE
+09EC  6FDE     MOVWF 0xDE, BANKED
+128:               // TUN 0; 
+129:               OSCTUNE = 0x00;
+09EE  0E00     MOVLW 0x0
+09F0  010E     MOVLB 0xE
+09F2  6FDD     MOVWF 0xDD, BANKED
+130:               // Set the secondary oscillator
+131:               
+132:           }
+09F4  0012     RETURN 0
+133:           
+134:           
+135:           /**
+136:            End of File
+137:           */
+---  /home/kruntz/Work/oltreNoi/MPLABXProjects/EncoderBaySlave.X/mcc_generated_files/interrupt_manager.c  
+1:             /**
+2:               Generated Interrupt Manager Source File
+3:             
+4:               @Company:
+5:                 Microchip Technology Inc.
+6:             
+7:               @File Name:
+8:                 interrupt_manager.c
+9:             
+10:              @Summary:
+11:                This is the Interrupt Manager file generated using MPLAB(c) Code Configurator
+12:            
+13:              @Description:
+14:                This header file provides implementations for global interrupt handling.
+15:                For individual peripheral handlers please see the peripheral driver for
+16:                all modules selected in the GUI.
+17:                Generation Information :
+18:                    Product Revision  :  MPLAB(c) Code Configurator - 4.15
+19:                    Device            :  PIC18F46K40
+20:                    Driver Version    :  1.02
+21:                The generated drivers are tested against the following:
+22:                    Compiler          :  XC8 1.35
+23:                    MPLAB             :  MPLAB X 3.40
+24:            */
+25:            
+26:            /*
+27:                (c) 2016 Microchip Technology Inc. and its subsidiaries. You may use this
+28:                software and any derivatives exclusively with Microchip products.
+29:            
+30:                THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
+31:                EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY IMPLIED
+32:                WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS FOR A
+33:                PARTICULAR PURPOSE, OR ITS INTERACTION WITH MICROCHIP PRODUCTS, COMBINATION
+34:                WITH ANY OTHER PRODUCTS, OR USE IN ANY APPLICATION.
+35:            
+36:                IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE,
+37:                INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND
+38:                WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP HAS
+39:                BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE. TO THE
+40:                FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL CLAIMS IN
+41:                ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT OF FEES, IF ANY,
+42:                THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
+43:            
+44:                MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE
+45:                TERMS.
+46:            */
+47:            
+48:            #include "interrupt_manager.h"
+49:            #include "mcc.h"
+50:            
+51:            void  INTERRUPT_Initialize (void)
+52:            {
+53:                // Disable Interrupt Priority Vectors (16CXXX Compatibility Mode)
+54:                INTCONbits.IPEN = 0;
+0A6C  9AF2     BCF INTCON, 5, ACCESS
+55:            }
+0A6E  0012     RETURN 0
+56:            
+57:            void interrupt INTERRUPT_InterruptManager (void)
+0008  824B     BSF btemp, 1, ACCESS
+000A  CFFA     MOVFF PCLATH, 0x30
+000C  F030     NOP
+000E  CFFB     MOVFF PCLATU, 0x31
+0010  F031     NOP
+0012  CFE9     MOVFF FSR0, 0x32
+0014  F032     NOP
+0016  CFEA     MOVFF FSR0H, 0x33
+0018  F033     NOP
+001A  CFE1     MOVFF FSR1, 0x34
+001C  F034     NOP
+001E  CFE2     MOVFF FSR1H, 0x35
+0020  F035     NOP
+0022  CFD9     MOVFF FSR2, 0x36
+0024  F036     NOP
+0026  CFDA     MOVFF FSR2H, 0x37
+0028  F037     NOP
+002A  CFF3     MOVFF PROD, 0x38
+002C  F038     NOP
+002E  CFF4     MOVFF PRODH, 0x39
+0030  F039     NOP
+0032  CFF6     MOVFF TBLPTR, 0x3A
+0034  F03A     NOP
+0036  CFF7     MOVFF TBLPTRH, 0x3B
+0038  F03B     NOP
+003A  CFF8     MOVFF TBLPTRU, 0x3C
+003C  F03C     NOP
+003E  CFF5     MOVFF TABLAT, 0x3D
+0040  F03D     NOP
+58:            {
+59:                // interrupt handler
+60:                if(PIE0bits.TMR0IE == 1 && PIR0bits.TMR0IF == 1)
+0042  010E     MOVLB 0xE
+0044  ABC2     BTFSS 0xC2, 5, BANKED
+0046  D006     BRA 0x54
+0048  010E     MOVLB 0xE
+004A  ABCA     BTFSS 0xCA, 5, BANKED
+004C  D003     BRA 0x54
+61:                {
+62:                    TMR0_ISR();
+004E  ECD9     CALL 0x9B2, 0
+0050  F004     NOP
+63:                }
+0052  D01F     BRA 0x92
+64:                else if(INTCONbits.PEIE == 1 && PIE3bits.BCL1IE == 1 && PIR3bits.BCL1IF == 1)
+0054  ACF2     BTFSS INTCON, 6, ACCESS
+0056  D009     BRA 0x6A
+0058  010E     MOVLB 0xE
+005A  A3C5     BTFSS 0xC5, 1, BANKED
+005C  D006     BRA 0x6A
+005E  010E     MOVLB 0xE
+0060  A3CD     BTFSS 0xCD, 1, BANKED
+0062  D003     BRA 0x6A
+65:                {
+66:                    I2C1_BusCollisionISR();
+0064  EC39     CALL 0xA72, 0
+0066  F005     NOP
+67:                }
+0068  D014     BRA 0x92
+68:                else if(INTCONbits.PEIE == 1 && PIE3bits.SSP1IE == 1 && PIR3bits.SSP1IF == 1)
+006A  ACF2     BTFSS INTCON, 6, ACCESS
+006C  D009     BRA 0x80
+006E  010E     MOVLB 0xE
+0070  A1C5     BTFSS 0xC5, 0, BANKED
+0072  D006     BRA 0x80
+0074  010E     MOVLB 0xE
+0076  A1CD     BTFSS 0xCD, 0, BANKED
+0078  D003     BRA 0x80
+69:                {
+70:                    I2C1_ISR();
+007A  EC69     CALL 0xD2, 0
+007C  F000     NOP
+71:                }
+007E  D009     BRA 0x92
+72:                else if(INTCONbits.PEIE == 1 && PIE3bits.SSP2IE == 1 && PIR3bits.SSP2IF == 1)
+0080  ACF2     BTFSS INTCON, 6, ACCESS
+0082  D007     BRA 0x92
+0084  010E     MOVLB 0xE
+0086  A5C5     BTFSS 0xC5, 2, BANKED
+0088  D004     BRA 0x92
+008A  010E     MOVLB 0xE
+008C  B5CD     BTFSC 0xCD, 2, BANKED
+73:                {
+74:                    I2C2_ISR();
+008E  EC28     CALL 0x850, 0
+0090  F004     NOP
+75:                }
+76:                else
+77:                {
+78:                    //Unhandled Interrupt
+79:                }
+80:            }
+0092  C03D     MOVFF 0x3D, TABLAT
+0094  FFF5     NOP
+0096  C03C     MOVFF 0x3C, TBLPTRU
+0098  FFF8     NOP
+009A  C03B     MOVFF 0x3B, TBLPTRH
+009C  FFF7     NOP
+009E  C03A     MOVFF 0x3A, TBLPTR
+00A0  FFF6     NOP
+00A2  C039     MOVFF 0x39, PRODH
+00A4  FFF4     NOP
+00A6  C038     MOVFF 0x38, PROD
+00A8  FFF3     NOP
+00AA  C037     MOVFF 0x37, FSR2H
+00AC  FFDA     NOP
+00AE  C036     MOVFF 0x36, FSR2
+00B0  FFD9     NOP
+00B2  C035     MOVFF 0x35, FSR1H
+00B4  FFE2     NOP
+00B6  C034     MOVFF 0x34, FSR1
+00B8  FFE1     NOP
+00BA  C033     MOVFF 0x33, FSR0H
+00BC  FFEA     NOP
+00BE  C032     MOVFF 0x32, FSR0
+00C0  FFE9     NOP
+00C2  C031     MOVFF 0x31, PCLATU
+00C4  FFFB     NOP
+00C6  C030     MOVFF 0x30, PCLATH
+00C8  FFFA     NOP
+00CA  924B     BCF btemp, 1, ACCESS
+00CC  0011     RETFIE 1
+81:            /**
+82:             End of File
+83:            */
+---  /home/kruntz/Work/oltreNoi/MPLABXProjects/EncoderBaySlave.X/mcc_generated_files/i2c2.c  ------------
+1:             /**
+2:               MSSP2 Generated Driver File
+3:             
+4:               @Company
+5:                 Microchip Technology Inc.
+6:             
+7:               @File Name
+8:                 i2c2.c
+9:             
+10:              @Summary
+11:                This is the generated header file for the MSSP2 driver using 
+12:                MPLAB(c) Code Configurator
+13:            
+14:              @Description
+15:                This header file provides APIs for driver for MSSP2.
+16:                Generation Information :
+17:                    Product Revision  :  MPLAB(c) Code Configurator - 4.15
+18:                    Device            :  PIC18F46K40
+19:                    Driver Version    :  2.00
+20:                The generated drivers are tested against the following:
+21:                    Compiler          :  XC8 1.35
+22:                    MPLAB 	          :  MPLAB X 3.40
+23:            */
+24:            
+25:            /*
+26:                (c) 2016 Microchip Technology Inc. and its subsidiaries. You may use this
+27:                software and any derivatives exclusively with Microchip products.
+28:            
+29:                THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
+30:                EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY IMPLIED
+31:                WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS FOR A
+32:                PARTICULAR PURPOSE, OR ITS INTERACTION WITH MICROCHIP PRODUCTS, COMBINATION
+33:                WITH ANY OTHER PRODUCTS, OR USE IN ANY APPLICATION.
+34:            
+35:                IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE,
+36:                INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND
+37:                WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP HAS
+38:                BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE. TO THE
+39:                FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL CLAIMS IN
+40:                ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT OF FEES, IF ANY,
+41:                THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
+42:            
+43:                MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE
+44:                TERMS.
+45:            */
+46:            
+47:            #include "i2c2.h"
+48:            
+49:            #define I2C2_SLAVE_ADDRESS 0x08 
+50:            #define I2C2_SLAVE_MASK    0x7F
+51:            
+52:            typedef enum
+53:            {
+54:                SLAVE_NORMAL_DATA,
+55:                SLAVE_DATA_ADDRESS,
+56:            } SLAVE_WRITE_DATA_TYPE;
+57:            
+58:            /**
+59:             Section: Global Variables
+60:            */
+61:            
+62:            volatile uint8_t    I2C2_slaveWriteData      = 0x55;
+63:            
+64:            /**
+65:             Section: Local Functions
+66:            */
+67:            void I2C2_StatusCallback(I2C2_SLAVE_DRIVER_STATUS i2c_bus_state);
+68:            
+69:            
+70:            
+71:            /**
+72:              Prototype:        void I2C2_Initialize(void)
+73:              Input:            none
+74:              Output:           none
+75:              Description:      I2C2_Initialize is an
+76:                                initialization routine that takes inputs from the GUI.
+77:              Comment:          
+78:              Usage:            I2C2_Initialize();
+79:            
+80:            */
+81:            void I2C2_Initialize(void)
+82:            {
+83:                // initialize the hardware
+84:                // SMP High Speed; CKE disabled; 
+85:                SSP2STAT = 0x00;
+0984  0E00     MOVLW 0x0
+0986  010E     MOVLB 0xE
+0988  6F95     MOVWF 0x95, BANKED
+86:                // SSPEN enabled; CKP disabled; SSPM 7 Bit Polling; 
+87:                SSP2CON1 = 0x26;
+098A  0E26     MOVLW 0x26
+098C  010E     MOVLB 0xE
+098E  6F96     MOVWF 0x96, BANKED
+88:                // ACKEN disabled; GCEN disabled; PEN disabled; ACKDT acknowledge; RSEN disabled; RCEN disabled; SEN disabled; 
+89:                SSP2CON2 = 0x00;
+0990  0E00     MOVLW 0x0
+0992  010E     MOVLB 0xE
+0994  6F97     MOVWF 0x97, BANKED
+90:                // SBCDE disabled; BOEN disabled; SCIE disabled; PCIE disabled; DHEN disabled; SDAHT 100ns; AHEN disabled; 
+91:                SSP2CON3 = 0x00;
+0996  0E00     MOVLW 0x0
+0998  010E     MOVLB 0xE
+099A  6F98     MOVWF 0x98, BANKED
+92:                // SSPMSK 127; 
+93:                SSP2MSK = (I2C2_SLAVE_MASK << 1);  // adjust UI mask for R/nW bit            
+099C  0EFE     MOVLW 0xFE
+099E  010E     MOVLB 0xE
+09A0  6F94     MOVWF 0x94, BANKED
+94:                // SSPADD 8; 
+95:                SSP2ADD = (I2C2_SLAVE_ADDRESS << 1);  // adjust UI address for R/nW bit
+09A2  0E10     MOVLW 0x10
+09A4  010E     MOVLB 0xE
+09A6  6F93     MOVWF 0x93, BANKED
+96:            
+97:                // clear the slave interrupt flag
+98:                PIR3bits.SSP2IF = 0;
+09A8  010E     MOVLB 0xE
+09AA  95CD     BCF 0xCD, 2, BANKED
+99:                // enable the master interrupt
+100:               PIE3bits.SSP2IE = 1;
+09AC  010E     MOVLB 0xE
+09AE  85C5     BSF 0xC5, 2, BANKED
+101:           
+102:           }
+09B0  0012     RETURN 0
+103:           
+104:           void I2C2_ISR ( void )
+105:           {
+106:               uint8_t     i2c_data                = 0x55;
+0850  0E55     MOVLW 0x55
+0852  6E2B     MOVWF i2c_data, ACCESS
+107:           
+108:           
+109:               // NOTE: The slave driver will always acknowledge
+110:               //       any address match.
+111:           
+112:               PIR3bits.SSP2IF = 0;        // clear the slave interrupt flag
+0854  010E     MOVLB 0xE
+0856  95CD     BCF 0xCD, 2, BANKED
+113:               i2c_data        = SSP2BUF;  // read SSPBUF to clear BF
+0858  CE92     MOVFF SSP2BUF, i2c_data
+085A  F02B     NOP
+114:               if(1 == SSP2STATbits.R_nW)
+085C  010E     MOVLB 0xE
+085E  A595     BTFSS 0x95, 2, BANKED
+0860  D00E     BRA 0x87E
+115:               {
+116:                   if((1 == SSP2STATbits.D_nA) && (1 == SSP2CON2bits.ACKSTAT))
+0862  010E     MOVLB 0xE
+0864  AB95     BTFSS 0x95, 5, BANKED
+0866  D007     BRA 0x876
+0868  010E     MOVLB 0xE
+086A  AD97     BTFSS 0x97, 6, BANKED
+086C  D004     BRA 0x876
+117:                   {
+118:                       // callback routine can perform any post-read processing
+119:                       I2C2_StatusCallback(I2C2_SLAVE_READ_COMPLETED);
+086E  0E03     MOVLW 0x3
+0870  EC90     CALL 0x720, 0
+0872  F003     NOP
+120:                   }
+0874  D010     BRA 0x896
+121:                   else
+122:                   {
+123:                       // callback routine should write data into SSPBUF
+124:                       I2C2_StatusCallback(I2C2_SLAVE_READ_REQUEST);
+0876  0E01     MOVLW 0x1
+0878  EC90     CALL 0x720, 0
+087A  F003     NOP
+125:                   }
+126:               }
+087C  D00C     BRA 0x896
+127:               else if(0 == SSP2STATbits.D_nA)
+087E  010E     MOVLB 0xE
+0880  BB95     BTFSC 0x95, 5, BANKED
+0882  D004     BRA 0x88C
+128:               {
+129:                   // this is an I2C address
+130:           
+131:                   // callback routine should prepare to receive data from the master
+132:                   I2C2_StatusCallback(I2C2_SLAVE_WRITE_REQUEST);
+0884  0E00     MOVLW 0x0
+0886  EC90     CALL 0x720, 0
+0888  F003     NOP
+133:               }
+088A  D005     BRA 0x896
+134:               else
+135:               {
+136:                   I2C2_slaveWriteData   = i2c_data;
+088C  C02B     MOVFF i2c_data, I2C2_slaveWriteData
+088E  F048     NOP
+137:           
+138:                   // callback routine should process I2C2_slaveWriteData from the master
+139:                   I2C2_StatusCallback(I2C2_SLAVE_WRITE_COMPLETED);
+0890  0E02     MOVLW 0x2
+0892  EC90     CALL 0x720, 0
+0894  F003     NOP
+140:               }
+141:           
+142:               SSP2CON1bits.CKP    = 1;    // release SCL
+0896  010E     MOVLB 0xE
+0898  8996     BSF 0x96, 4, BANKED
+143:           
+144:           } // end I2C2_ISR()
+089A  0012     RETURN 0
+145:           
+146:           
+147:           
+148:           /**
+149:           
+150:               Example implementation of the callback
+151:           
+152:               This slave driver emulates an EEPROM Device.
+153:               Sequential reads from the EEPROM will return data at the next
+154:               EEPROM address.
+155:           
+156:               Random access reads can be performed by writing a single byte
+157:               EEPROM address, followed by 1 or more reads.
+158:           
+159:               Random access writes can be performed by writing a single byte
+160:               EEPROM address, followed by 1 or more writes.
+161:           
+162:               Every read or write will increment the internal EEPROM address.
+163:           
+164:               When the end of the EEPROM is reached, the EEPROM address will
+165:               continue from the start of the EEPROM.
+166:           */
+167:           
+168:           void I2C2_StatusCallback(I2C2_SLAVE_DRIVER_STATUS i2c_bus_state)
+0720  6E2A     MOVWF __pcstackCOMRAM, ACCESS
+169:           {
+170:           
+171:               static uint8_t EEPROM_Buffer[] =
+172:               {
+173:                   0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f,
+174:                   0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,0x1a,0x1b,0x1c,0x1d,0x1e,0x1f,
+175:                   0x20,0x21,0x22,0x23,0x24,0x25,0x26,0x27,0x28,0x29,0x2a,0x2b,0x2c,0x2d,0x2e,0x2f,
+176:                   0x30,0x31,0x32,0x33,0x34,0x35,0x36,0x37,0x38,0x39,0x3a,0x3b,0x3c,0x3d,0x3e,0x3f,
+177:                   0x40,0x41,0x42,0x43,0x44,0x45,0x46,0x47,0x48,0x49,0x4a,0x4b,0x4c,0x4d,0x4e,0x4f,
+178:                   0x50,0x51,0x52,0x53,0x54,0x55,0x56,0x57,0x58,0x59,0x5a,0x5b,0x5c,0x5d,0x5e,0x5f,
+179:                   0x60,0x61,0x62,0x63,0x64,0x65,0x66,0x67,0x68,0x69,0x6a,0x6b,0x6c,0x6d,0x6e,0x6f,
+180:                   0x70,0x71,0x72,0x73,0x74,0x75,0x76,0x77,0x78,0x79,0x7a,0x7b,0x7c,0x7d,0x7e,0x7f,
+181:               };
+182:           
+183:               static uint8_t eepromAddress    = 0;
+184:               static uint8_t slaveWriteType   = SLAVE_NORMAL_DATA;
+185:           
+186:           
+187:               switch (i2c_bus_state)
+0722  D034     BRA 0x78C
+078C  502A     MOVF __pcstackCOMRAM, W, ACCESS
+188:               {
+189:                   case I2C2_SLAVE_WRITE_REQUEST:
+190:                       // the master will be sending the eeprom address next
+191:                       slaveWriteType  = SLAVE_DATA_ADDRESS;
+0724  0E01     MOVLW 0x1
+0726  6E17     MOVWF slaveWriteType, ACCESS
+192:                       break;
+0728  0012     RETURN 0
+193:           
+194:           
+195:                   case I2C2_SLAVE_WRITE_COMPLETED:
+196:           
+197:                       switch(slaveWriteType)
+0752  5017     MOVF slaveWriteType, W, ACCESS
+0754  0A00     XORLW 0x0
+0756  B4D8     BTFSC STATUS, 2, ACCESS
+0758  D7EB     BRA 0x730
+075A  0A01     XORLW 0x1
+075C  B4D8     BTFSC STATUS, 2, ACCESS
+075E  D7E5     BRA 0x72A
+0760  D7E7     BRA 0x730
+198:                       {
+199:                           case SLAVE_DATA_ADDRESS:
+200:                               eepromAddress   = I2C2_slaveWriteData;
+072A  C048     MOVFF I2C2_slaveWriteData, eepromAddress
+072C  F018     NOP
+201:                               break;
+072E  D019     BRA 0x762
+202:           
+203:           
+204:                           case SLAVE_NORMAL_DATA:
+205:                           default:
+206:                               // the master has written data to store in the eeprom
+207:                               EEPROM_Buffer[eepromAddress++]    = I2C2_slaveWriteData;
+0730  5018     MOVF eepromAddress, W, ACCESS
+0732  0D01     MULLW 0x1
+0734  0E60     MOVLW 0x60
+0736  24F3     ADDWF PROD, W, ACCESS
+0738  6ED9     MOVWF FSR2, ACCESS
+073A  0E00     MOVLW 0x0
+073C  20F4     ADDWFC PRODH, W, ACCESS
+073E  6EDA     MOVWF FSR2H, ACCESS
+0740  C048     MOVFF I2C2_slaveWriteData, INDF2
+0742  FFDF     NOP
+0744  2A18     INCF eepromAddress, F, ACCESS
+208:                               if(sizeof(EEPROM_Buffer) <= eepromAddress)
+0746  0E7F     MOVLW 0x7F
+0748  6418     CPFSGT eepromAddress, ACCESS
+074A  D00B     BRA 0x762
+209:                               {
+210:                                   eepromAddress = 0;    // wrap to start of eeprom page
+074C  0E00     MOVLW 0x0
+074E  6E18     MOVWF eepromAddress, ACCESS
+211:                               }
+212:                               break;
+213:           
+214:                       } // end switch(slaveWriteType)
+0750  D008     BRA 0x762
+215:           
+216:                       slaveWriteType  = SLAVE_NORMAL_DATA;
+0762  0E00     MOVLW 0x0
+0764  6E17     MOVWF slaveWriteType, ACCESS
+217:                       break;
+0766  0012     RETURN 0
+218:           
+219:                   case I2C2_SLAVE_READ_REQUEST:
+220:                       SSP2BUF = EEPROM_Buffer[eepromAddress++];
+0768  5018     MOVF eepromAddress, W, ACCESS
+076A  0D01     MULLW 0x1
+076C  0E60     MOVLW 0x60
+076E  24F3     ADDWF PROD, W, ACCESS
+0770  6ED9     MOVWF FSR2, ACCESS
+0772  0E00     MOVLW 0x0
+0774  20F4     ADDWFC PRODH, W, ACCESS
+0776  6EDA     MOVWF FSR2H, ACCESS
+0778  50DF     MOVF INDF2, W, ACCESS
+077A  010E     MOVLB 0xE
+077C  6F92     MOVWF 0x92, BANKED
+077E  2A18     INCF eepromAddress, F, ACCESS
+221:                       if(sizeof(EEPROM_Buffer) <= eepromAddress)
+0780  0E7F     MOVLW 0x7F
+0782  6418     CPFSGT eepromAddress, ACCESS
+0784  0012     RETURN 0
+222:                       {
+223:                           eepromAddress = 0;    // wrap to start of eeprom page
+0786  0E00     MOVLW 0x0
+0788  6E18     MOVWF eepromAddress, ACCESS
+224:                       }
+225:                       break;
+226:           
+227:                   case I2C2_SLAVE_READ_COMPLETED:
+228:                   default:;
+229:           
+230:               } // end switch(i2c_bus_state)
+078A  0012     RETURN 0
+078C  502A     MOVF __pcstackCOMRAM, W, ACCESS
+078E  0A00     XORLW 0x0
+0790  B4D8     BTFSC STATUS, 2, ACCESS
+0792  D7C8     BRA 0x724
+0794  0A01     XORLW 0x1
+0796  B4D8     BTFSC STATUS, 2, ACCESS
+0798  D7E7     BRA 0x768
+079A  0A03     XORLW 0x3
+079C  B4D8     BTFSC STATUS, 2, ACCESS
+079E  D7D9     BRA 0x752
+07A0  0A01     XORLW 0x1
+07A2  0012     RETURN 0
+231:           
+232:           }
+233:           
+---  /home/kruntz/Work/oltreNoi/MPLABXProjects/EncoderBaySlave.X/mcc_generated_files/i2c1.c  ------------
+1:             /**
+2:               I2C1 Generated Driver File
+3:             
+4:               @Company
+5:                 Microchip Technology Inc.
+6:             
+7:               @File Name
+8:                 i2c1.c
+9:             
+10:              @Summary
+11:                This is the generated header file for the I2C1 driver using MPLAB(c) Code Configurator
+12:            
+13:              @Description
+14:                This header file provides APIs for driver for I2C1.
+15:                Generation Information :
+16:                    Product Revision  :  MPLAB(c) Code Configurator - 4.15
+17:                    Device            :  PIC18F46K40
+18:                    Driver Version    :  2.00
+19:                The generated drivers are tested against the following:
+20:                    Compiler          :  XC8 1.35
+21:                    MPLAB 	          :  MPLAB X 3.40
+22:            */
+23:            
+24:            /*
+25:                (c) 2016 Microchip Technology Inc. and its subsidiaries. You may use this
+26:                software and any derivatives exclusively with Microchip products.
+27:            
+28:                THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
+29:                EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY IMPLIED
+30:                WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS FOR A
+31:                PARTICULAR PURPOSE, OR ITS INTERACTION WITH MICROCHIP PRODUCTS, COMBINATION
+32:                WITH ANY OTHER PRODUCTS, OR USE IN ANY APPLICATION.
+33:            
+34:                IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE,
+35:                INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND
+36:                WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP HAS
+37:                BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE. TO THE
+38:                FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL CLAIMS IN
+39:                ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT OF FEES, IF ANY,
+40:                THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
+41:            
+42:                MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE
+43:                TERMS.
+44:            */
+45:            
+46:            /**
+47:              Section: Included Files
+48:            */
+49:            
+50:            #include "i2c1.h"
+51:            
+52:            /**
+53:              I2C Driver Queue Status Type
+54:            
+55:              @Summary
+56:                Defines the type used for the transaction queue status.
+57:            
+58:              @Description
+59:                This defines type used to keep track of the queue status.
+60:             */
+61:            
+62:            typedef union
+63:            {
+64:                struct
+65:                {
+66:                        uint8_t full:1;
+67:                        uint8_t empty:1;
+68:                        uint8_t reserved:6;
+69:                }s;
+70:                uint8_t status;
+71:            }I2C_TR_QUEUE_STATUS;
+72:            
+73:            /**
+74:              I2C Driver Queue Entry Type
+75:            
+76:              @Summary
+77:                Defines the object used for an entry in the i2c queue items.
+78:            
+79:              @Description
+80:                This defines the object in the i2c queue. Each entry is a composed
+81:                of a list of TRBs, the number of the TRBs and the status of the
+82:                currently processed TRB.
+83:             */
+84:            typedef struct
+85:            {
+86:                uint8_t                             count;          // a count of trb's in the trb list
+87:                I2C1_TRANSACTION_REQUEST_BLOCK *ptrb_list;     // pointer to the trb list
+88:                I2C1_MESSAGE_STATUS            *pTrFlag;       // set with the error of the last trb sent.
+89:                                                                    // if all trb's are sent successfully,
+90:                                                                    // then this is I2C1_MESSAGE_COMPLETE
+91:            } I2C_TR_QUEUE_ENTRY;
+92:            
+93:            /**
+94:              I2C Master Driver Object Type
+95:            
+96:              @Summary
+97:                Defines the object that manages the i2c master.
+98:            
+99:              @Description
+100:               This defines the object that manages the sending and receiving of
+101:               i2c master transactions.
+102:             */
+103:           
+104:           typedef struct
+105:           {
+106:               /* Read/Write Queue */
+107:               I2C_TR_QUEUE_ENTRY          *pTrTail;       // tail of the queue
+108:               I2C_TR_QUEUE_ENTRY          *pTrHead;       // head of the queue
+109:               I2C_TR_QUEUE_STATUS         trStatus;       // status of the last transaction
+110:               uint8_t                         i2cDoneFlag;    // flag to indicate the current
+111:                                                               // transaction is done
+112:               uint8_t                         i2cErrors;      // keeps track of errors
+113:           
+114:           
+115:           } I2C_OBJECT ;
+116:           
+117:           /**
+118:             I2C Master Driver State Enumeration
+119:           
+120:             @Summary
+121:               Defines the different states of the i2c master.
+122:           
+123:             @Description
+124:               This defines the different states that the i2c master
+125:               used to process transactions on the i2c bus.
+126:           */
+127:           
+128:           typedef enum
+129:           {
+130:               S_MASTER_IDLE,
+131:               S_MASTER_RESTART,
+132:               S_MASTER_SEND_ADDR,
+133:               S_MASTER_SEND_DATA,
+134:               S_MASTER_SEND_STOP,
+135:               S_MASTER_ACK_ADDR,
+136:               S_MASTER_RCV_DATA,
+137:               S_MASTER_RCV_STOP,
+138:               S_MASTER_ACK_RCV_DATA,
+139:               S_MASTER_NOACK_STOP,
+140:               S_MASTER_SEND_ADDR_10BIT_LSB,
+141:               S_MASTER_10BIT_RESTART,
+142:               
+143:           } I2C_MASTER_STATES;
+144:           
+145:           /**
+146:            Section: Macro Definitions
+147:           */
+148:           
+149:           /* defined for I2C1 */
+150:           
+151:           #ifndef I2C1_CONFIG_TR_QUEUE_LENGTH
+152:                   #define I2C1_CONFIG_TR_QUEUE_LENGTH 1
+153:           #endif
+154:           
+155:           #define I2C1_TRANSMIT_REG                       SSP1BUF                 // Defines the transmit register used to send data.
+156:           #define I2C1_RECEIVE_REG                        SSP1BUF                 // Defines the receive register used to receive data.
+157:           
+158:           // The following control bits are used in the I2C state machine to manage
+159:           // the I2C module and determine next states.
+160:           #define I2C1_WRITE_COLLISION_STATUS_BIT         SSP1CON1bits.WCOL     // Defines the write collision status bit.
+161:           #define I2C1_MODE_SELECT_BITS                   SSP1CON1bits.SSPM     // I2C Master Mode control bit.
+162:           #define I2C1_MASTER_ENABLE_CONTROL_BITS         SSP1CON1bits.SSPEN    // I2C port enable control bit.
+163:           
+164:           #define I2C1_START_CONDITION_ENABLE_BIT         SSP1CON2bits.SEN      // I2C START control bit.
+165:           #define I2C1_REPEAT_START_CONDITION_ENABLE_BIT  SSP1CON2bits.RSEN     // I2C Repeated START control bit.
+166:           #define I2C1_RECEIVE_ENABLE_BIT                 SSP1CON2bits.RCEN     // I2C Receive enable control bit.
+167:           #define I2C1_STOP_CONDITION_ENABLE_BIT          SSP1CON2bits.PEN      // I2C STOP control bit.
+168:           #define I2C1_ACKNOWLEDGE_ENABLE_BIT             SSP1CON2bits.ACKEN    // I2C ACK start control bit.
+169:           #define I2C1_ACKNOWLEDGE_DATA_BIT               SSP1CON2bits.ACKDT    // I2C ACK data control bit.
+170:           #define I2C1_ACKNOWLEDGE_STATUS_BIT             SSP1CON2bits.ACKSTAT  // I2C ACK status bit.
+171:           
+172:           #define I2C1_7bit    true
+173:           /**
+174:            Section: Local Functions
+175:           */
+176:           
+177:           void I2C1_FunctionComplete(void);
+178:           void I2C1_Stop(I2C1_MESSAGE_STATUS completion_code);
+179:           
+180:           /**
+181:            Section: Local Variables
+182:           */
+183:           
+184:           static I2C_TR_QUEUE_ENTRY                  i2c1_tr_queue[I2C1_CONFIG_TR_QUEUE_LENGTH];
+185:           static I2C_OBJECT                          i2c1_object;
+186:           static I2C_MASTER_STATES                   i2c1_state = S_MASTER_IDLE;
+187:           static uint8_t                                 i2c1_trb_count = 0;
+188:           
+189:           static I2C1_TRANSACTION_REQUEST_BLOCK       *p_i2c1_trb_current = NULL;
+190:           static I2C_TR_QUEUE_ENTRY                  *p_i2c1_current = NULL;
+191:           
+192:           
+193:           /**
+194:             Section: Driver Interface
+195:           */
+196:           
+197:           
+198:           void I2C1_Initialize(void)
+199:           {
+200:               i2c1_object.pTrHead = i2c1_tr_queue;
+0924  0E23     MOVLW 0x23
+0926  6E03     MOVWF 0x3, ACCESS
+0928  0E00     MOVLW 0x0
+092A  6E04     MOVWF 0x4, ACCESS
+201:               i2c1_object.pTrTail = i2c1_tr_queue;
+092C  0E23     MOVLW 0x23
+092E  6E01     MOVWF i2c1_object, ACCESS
+0930  0E00     MOVLW 0x0
+0932  6E02     MOVWF 0x2, ACCESS
+202:               i2c1_object.trStatus.s.empty = true;
+0934  8205     BSF 0x5, 1, ACCESS
+203:               i2c1_object.trStatus.s.full = false;
+0936  9005     BCF 0x5, 0, ACCESS
+204:           
+205:               i2c1_object.i2cErrors = 0;
+0938  0E00     MOVLW 0x0
+093A  6E07     MOVWF 0x7, ACCESS
+206:           
+207:               // SMP High Speed; CKE disabled; 
+208:               SSP1STAT = 0x00;
+093C  0E00     MOVLW 0x0
+093E  6E95     MOVWF SSP1STAT, ACCESS
+209:               // SSPEN enabled; CKP Idle:Low, Active:High; SSPM FOSC/4_SSPxADD_I2C; 
+210:               SSP1CON1 = 0x28;
+0940  0E28     MOVLW 0x28
+0942  6E96     MOVWF SSP1CON1, ACCESS
+211:               // SBCDE disabled; BOEN disabled; SCIE disabled; PCIE disabled; DHEN disabled; SDAHT 100ns; AHEN disabled; 
+212:               SSP1CON3 = 0x00;
+0944  0E00     MOVLW 0x0
+0946  6E98     MOVWF SSP1CON3, ACCESS
+213:               // Baud Rate Generator Value: SSPADD 39;   
+214:               SSP1ADD = 0x27;
+0948  0E27     MOVLW 0x27
+094A  6E93     MOVWF SSP1ADD, ACCESS
+215:           
+216:              
+217:               // clear the master interrupt flag
+218:               PIR3bits.SSP1IF = 0;
+094C  010E     MOVLB 0xE
+094E  91CD     BCF 0xCD, 0, BANKED
+219:               // enable the master interrupt
+220:               PIE3bits.SSP1IE = 1;
+0950  010E     MOVLB 0xE
+0952  81C5     BSF 0xC5, 0, BANKED
+221:               
+222:           }
+0954  0012     RETURN 0
+223:           
+224:                   
+225:           uint8_t I2C1_ErrorCountGet(void)
+226:           {
+227:               uint8_t ret;
+228:           
+229:               ret = i2c1_object.i2cErrors;
+230:               return ret;
+231:           }
+232:           
+233:           void I2C1_ISR ( void )
+234:           {
+235:             
+236:               static uint8_t  *pi2c_buf_ptr;
+237:               static uint16_t i2c_address         = 0;
+238:               static uint8_t  i2c_bytes_left      = 0;
+239:               static uint8_t  i2c_10bit_address_restart = 0;
+240:           
+241:               PIR3bits.SSP1IF = 0;
+00D2  010E     MOVLB 0xE
+00D4  91CD     BCF 0xCD, 0, BANKED
+242:           
+243:               // Check first if there was a collision.
+244:               // If we have a Write Collision, reset and go to idle state */
+245:               if(I2C1_WRITE_COLLISION_STATUS_BIT)
+00D6  AE96     BTFSS SSP1CON1, 7, ACCESS
+00D8  D0F9     BRA 0x2CC
+246:               {
+247:                   // clear the Write colision
+248:                   I2C1_WRITE_COLLISION_STATUS_BIT = 0;
+00DA  9E96     BCF SSP1CON1, 7, ACCESS
+249:                   i2c1_state = S_MASTER_IDLE;
+00DC  0E00     MOVLW 0x0
+00DE  6E16     MOVWF i2c1_state, ACCESS
+250:                   *(p_i2c1_current->pTrFlag) = I2C1_MESSAGE_FAIL;
+00E0  EE20     LFSR 2, 0x3
+00E2  F003     NOP
+00E4  500A     MOVF p_i2c1_current, W, ACCESS
+00E6  26D9     ADDWF FSR2, F, ACCESS
+00E8  500B     MOVF 0xB, W, ACCESS
+00EA  22DA     ADDWFC FSR2H, F, ACCESS
+00EC  CFDE     MOVFF POSTINC2, 0x2D
+00EE  F02D     NOP
+00F0  CFDD     MOVFF POSTDEC2, 0x2E
+00F2  F02E     NOP
+00F4  C02D     MOVFF 0x2D, FSR2
+00F6  FFD9     NOP
+00F8  C02E     MOVFF 0x2E, FSR2H
+00FA  FFDA     NOP
+00FC  0E01     MOVLW 0x1
+00FE  6EDF     MOVWF INDF2, ACCESS
+251:           
+252:                   // reset the buffer pointer
+253:                   p_i2c1_current = NULL;
+0100  0E00     MOVLW 0x0
+0102  6E0A     MOVWF p_i2c1_current, ACCESS
+0104  0E00     MOVLW 0x0
+0106  6E0B     MOVWF 0xB, ACCESS
+254:           
+255:                   return;
+0108  0012     RETURN 0
+256:               }
+257:           
+258:               /* Handle the correct i2c state */
+259:               switch(i2c1_state)
+02CC  5016     MOVF i2c1_state, W, ACCESS
+260:               {
+261:                   case S_MASTER_IDLE:    /* In reset state, waiting for data to send */
+262:           
+263:                       if(i2c1_object.trStatus.s.empty != true)
+010A  B205     BTFSC 0x5, 1, ACCESS
+010C  0012     RETURN 0
+264:                       {
+265:                           // grab the item pointed by the head
+266:                           p_i2c1_current     = i2c1_object.pTrHead;
+010E  C003     MOVFF 0x3, p_i2c1_current
+0110  F00A     NOP
+0112  C004     MOVFF 0x4, 0xB
+0114  F00B     NOP
+267:                           i2c1_trb_count     = i2c1_object.pTrHead->count;
+0116  C003     MOVFF 0x3, FSR2
+0118  FFD9     NOP
+011A  C004     MOVFF 0x4, FSR2H
+011C  FFDA     NOP
+011E  50DF     MOVF INDF2, W, ACCESS
+0120  6E15     MOVWF i2c1_trb_count, ACCESS
+268:                           p_i2c1_trb_current = i2c1_object.pTrHead->ptrb_list;
+0122  EE20     LFSR 2, 0x1
+0124  F001     NOP
+0126  5003     MOVF 0x3, W, ACCESS
+0128  26D9     ADDWF FSR2, F, ACCESS
+012A  5004     MOVF 0x4, W, ACCESS
+012C  22DA     ADDWFC FSR2H, F, ACCESS
+012E  CFDE     MOVFF POSTINC2, p_i2c1_trb_current
+0130  F00C     NOP
+0132  CFDD     MOVFF POSTDEC2, 0xD
+0134  F00D     NOP
+269:           
+270:                           i2c1_object.pTrHead++;
+0136  0E05     MOVLW 0x5
+0138  2603     ADDWF 0x3, F, ACCESS
+013A  0E00     MOVLW 0x0
+013C  2204     ADDWFC 0x4, F, ACCESS
+271:           
+272:                           // check if the end of the array is reached
+273:                           if(i2c1_object.pTrHead == (i2c1_tr_queue + I2C1_CONFIG_TR_QUEUE_LENGTH))
+013E  0E28     MOVLW 0x28
+0140  1803     XORWF 0x3, W, ACCESS
+0142  E108     BNZ 0x154
+0144  0E00     MOVLW 0x0
+0146  1804     XORWF 0x4, W, ACCESS
+0148  A4D8     BTFSS STATUS, 2, ACCESS
+014A  D004     BRA 0x154
+274:                           {
+275:                               // adjust to restart at the beginning of the array
+276:                               i2c1_object.pTrHead = i2c1_tr_queue;
+014C  0E23     MOVLW 0x23
+014E  6E03     MOVWF 0x3, ACCESS
+0150  0E00     MOVLW 0x0
+0152  6E04     MOVWF 0x4, ACCESS
+277:                           }
+278:           
+279:                           // since we moved one item to be processed, we know
+280:                           // it is not full, so set the full status to false
+281:                           i2c1_object.trStatus.s.full = false;
+0154  9005     BCF 0x5, 0, ACCESS
+282:           
+283:                           // check if the queue is empty
+284:                           if(i2c1_object.pTrHead == i2c1_object.pTrTail)
+0156  5001     MOVF i2c1_object, W, ACCESS
+0158  1803     XORWF 0x3, W, ACCESS
+015A  E104     BNZ 0x164
+015C  5002     MOVF 0x2, W, ACCESS
+015E  1804     XORWF 0x4, W, ACCESS
+0160  B4D8     BTFSC STATUS, 2, ACCESS
+285:                           {
+286:                               // it is empty so set the empty status to true
+287:                               i2c1_object.trStatus.s.empty = true;
+0162  8205     BSF 0x5, 1, ACCESS
+288:                           }
+289:           
+290:                           // send the start condition
+291:                           I2C1_START_CONDITION_ENABLE_BIT = 1;
+0164  8097     BSF SSP1CON2, 0, ACCESS
+292:                           
+293:                           // start the i2c request
+294:                           i2c1_state = S_MASTER_SEND_ADDR;
+0166  0E02     MOVLW 0x2
+0168  6E16     MOVWF i2c1_state, ACCESS
+295:                       }
+296:           
+297:                       break;
+016A  0012     RETURN 0
+298:           
+299:                   case S_MASTER_RESTART:
+300:           
+301:                       /* check for pending i2c Request */
+302:           
+303:                       // ... trigger a REPEATED START
+304:                       I2C1_REPEAT_START_CONDITION_ENABLE_BIT = 1;
+016C  8297     BSF SSP1CON2, 1, ACCESS
+305:           
+306:                       // start the i2c request
+307:                       i2c1_state = S_MASTER_SEND_ADDR;
+016E  0E02     MOVLW 0x2
+0170  6E16     MOVWF i2c1_state, ACCESS
+308:           
+309:                       break;
+0172  0012     RETURN 0
+310:           
+311:                   case S_MASTER_SEND_ADDR_10BIT_LSB:
+312:           
+313:                       if(I2C1_ACKNOWLEDGE_STATUS_BIT)
+0174  AC97     BTFSS SSP1CON2, 6, ACCESS
+0176  D005     BRA 0x182
+314:                       {
+315:                           i2c1_object.i2cErrors++;
+0178  2A07     INCF 0x7, F, ACCESS
+316:                           I2C1_Stop(I2C1_MESSAGE_ADDRESS_NO_ACK);
+017A  0E04     MOVLW 0x4
+017C  EC73     CALL 0x8E6, 0
+017E  F004     NOP
+317:                       }
+0180  0012     RETURN 0
+318:                       else
+319:                       {
+320:                           // Remove bit 0 as R/W is never sent here
+321:                           I2C1_TRANSMIT_REG = (i2c_address >> 1) & 0x00FF;
+0182  90D8     BCF STATUS, 0, ACCESS
+0184  3029     RRCF 0x29, W, ACCESS
+0186  6E2E     MOVWF 0x2E, ACCESS
+0188  3028     RRCF i2c_address, W, ACCESS
+018A  6E2D     MOVWF 0x2D, ACCESS
+018C  502D     MOVF 0x2D, W, ACCESS
+018E  6E92     MOVWF SSP1BUF, ACCESS
+322:           
+323:                           // determine the next state, check R/W
+324:                           if(i2c_address & 0x01)
+0190  A028     BTFSS i2c_address, 0, ACCESS
+0192  D003     BRA 0x19A
+325:                           {
+326:                               // if this is a read we must repeat start
+327:                               // the bus to perform a read
+328:                               i2c1_state = S_MASTER_10BIT_RESTART;
+0194  0E0B     MOVLW 0xB
+0196  6E16     MOVWF i2c1_state, ACCESS
+329:                           }
+0198  0012     RETURN 0
+330:                           else
+331:                           {
+332:                               // this is a write continue writing data
+333:                               i2c1_state = S_MASTER_SEND_DATA;
+019A  0E03     MOVLW 0x3
+019C  6E16     MOVWF i2c1_state, ACCESS
+334:                           }
+335:                       }
+336:           
+337:                       break;
+019E  0012     RETURN 0
+338:           
+339:                   case S_MASTER_10BIT_RESTART:
+340:           
+341:                       if(I2C1_ACKNOWLEDGE_STATUS_BIT)
+01A0  AC97     BTFSS SSP1CON2, 6, ACCESS
+01A2  D005     BRA 0x1AE
+342:                       {
+343:                           i2c1_object.i2cErrors++;
+01A4  2A07     INCF 0x7, F, ACCESS
+344:                           I2C1_Stop(I2C1_MESSAGE_ADDRESS_NO_ACK);
+01A6  0E04     MOVLW 0x4
+01A8  EC73     CALL 0x8E6, 0
+01AA  F004     NOP
+345:                       }
+01AC  0012     RETURN 0
+346:                       else
+347:                       {
+348:                           // ACK Status is good
+349:                           // restart the bus
+350:                           I2C1_REPEAT_START_CONDITION_ENABLE_BIT = 1;
+01AE  8297     BSF SSP1CON2, 1, ACCESS
+351:           
+352:                           // fudge the address so S_MASTER_SEND_ADDR works correctly
+353:                           // we only do this on a 10-bit address resend
+354:                           i2c_address = 0x00F0 | ((i2c_address >> 8) & 0x0006);
+01B0  C028     MOVFF i2c_address, 0x2D
+01B2  F02D     NOP
+01B4  C029     MOVFF 0x29, 0x2E
+01B6  F02E     NOP
+01B8  C02E     MOVFF 0x2E, 0x2D
+01BA  F02D     NOP
+01BC  6A2E     CLRF 0x2E, ACCESS
+01BE  0E06     MOVLW 0x6
+01C0  162D     ANDWF 0x2D, F, ACCESS
+01C2  0E00     MOVLW 0x0
+01C4  162E     ANDWF 0x2E, F, ACCESS
+01C6  0EF0     MOVLW 0xF0
+01C8  102D     IORWF 0x2D, W, ACCESS
+01CA  6E28     MOVWF i2c_address, ACCESS
+01CC  502E     MOVF 0x2E, W, ACCESS
+01CE  6E29     MOVWF 0x29, ACCESS
+355:           
+356:                           // set the R/W flag
+357:                           i2c_address |= 0x0001;
+01D0  8028     BSF i2c_address, 0, ACCESS
+358:           
+359:                           // set the address restart flag so we do not change the address
+360:                           i2c_10bit_address_restart = 1;
+01D2  0E01     MOVLW 0x1
+01D4  6E13     MOVWF i2c_10bit_address_restart, ACCESS
+361:           
+362:                           // Resend the address as a read
+363:                           i2c1_state = S_MASTER_SEND_ADDR;
+01D6  0E02     MOVLW 0x2
+01D8  6E16     MOVWF i2c1_state, ACCESS
+364:                       }
+365:           
+366:                       break;
+01DA  0012     RETURN 0
+367:           
+368:                   case S_MASTER_SEND_ADDR:
+369:           
+370:                       /* Start has been sent, send the address byte */
+371:           
+372:                       /* Note: 
+373:                           On a 10-bit address resend (done only during a 10-bit
+374:                           device read), the original i2c_address was modified in
+375:                           S_MASTER_10BIT_RESTART state. So the check if this is
+376:                           a 10-bit address will fail and a normal 7-bit address
+377:                           is sent with the R/W bit set to read. The flag
+378:                           i2c_10bit_address_restart prevents the  address to
+379:                           be re-written.
+380:                        */
+381:                       if(i2c_10bit_address_restart != 1)
+01DC  0413     DECF i2c_10bit_address_restart, W, ACCESS
+01DE  B4D8     BTFSC STATUS, 2, ACCESS
+01E0  D01A     BRA 0x216
+382:                       {
+383:                           // extract the information for this message
+384:                           i2c_address    = p_i2c1_trb_current->address;
+01E2  C00C     MOVFF p_i2c1_trb_current, FSR2
+01E4  FFD9     NOP
+01E6  C00D     MOVFF 0xD, FSR2H
+01E8  FFDA     NOP
+01EA  CFDE     MOVFF POSTINC2, i2c_address
+01EC  F028     NOP
+01EE  CFDD     MOVFF POSTDEC2, 0x29
+01F0  F029     NOP
+385:                           pi2c_buf_ptr   = p_i2c1_trb_current->pbuffer;
+01F2  EE20     LFSR 2, 0x3
+01F4  F003     NOP
+01F6  500C     MOVF p_i2c1_trb_current, W, ACCESS
+01F8  26D9     ADDWF FSR2, F, ACCESS
+01FA  500D     MOVF 0xD, W, ACCESS
+01FC  22DA     ADDWFC FSR2H, F, ACCESS
+01FE  CFDE     MOVFF POSTINC2, pi2c_buf_ptr
+0200  F008     NOP
+0202  CFDD     MOVFF POSTDEC2, 0x9
+0204  F009     NOP
+386:                           i2c_bytes_left = p_i2c1_trb_current->length;
+0206  EE20     LFSR 2, 0x2
+0208  F002     NOP
+020A  500C     MOVF p_i2c1_trb_current, W, ACCESS
+020C  26D9     ADDWF FSR2, F, ACCESS
+020E  500D     MOVF 0xD, W, ACCESS
+0210  22DA     ADDWFC FSR2H, F, ACCESS
+0212  50DF     MOVF INDF2, W, ACCESS
+0214  6E14     MOVWF i2c_bytes_left, ACCESS
+387:                       }
+388:           
+389:                       // check for 10-bit address
+390:                       if(!I2C1_7bit && (0x0 != i2c_address))
+391:                       {  
+392:                           if (0 == i2c_10bit_address_restart)
+393:                           {
+394:                               // we have a 10 bit address
+395:                               // send bits<9:8>
+396:                               // mask bit 0 as this is always a write                    
+397:                               I2C1_TRANSMIT_REG = 0xF0 | ((i2c_address >> 8) & 0x0006);
+398:                               i2c1_state = S_MASTER_SEND_ADDR_10BIT_LSB;
+399:                           }
+400:                           else
+401:                           {
+402:                               // resending address bits<9:8> to trigger read
+403:                               I2C1_TRANSMIT_REG = i2c_address;
+404:                               i2c1_state = S_MASTER_ACK_ADDR;
+405:                               // reset the flag so the next access is ok
+406:                               i2c_10bit_address_restart = 0;
+407:                           }
+408:                       }
+409:                       else
+410:                       {
+411:                           // Transmit the address
+412:                           I2C1_TRANSMIT_REG = i2c_address;
+0216  C028     MOVFF i2c_address, SSP1BUF
+0218  FF92     NOP
+413:                           if(i2c_address & 0x01)
+021A  A028     BTFSS i2c_address, 0, ACCESS
+021C  D003     BRA 0x224
+414:                           {
+415:                               // Next state is to wait for address to be acked
+416:                               i2c1_state = S_MASTER_ACK_ADDR;
+021E  0E05     MOVLW 0x5
+0220  6E16     MOVWF i2c1_state, ACCESS
+417:                           }
+0222  0012     RETURN 0
+418:                           else
+419:                           {
+420:                               // Next state is transmit
+421:                               i2c1_state = S_MASTER_SEND_DATA;
+0224  0E03     MOVLW 0x3
+0226  6E16     MOVWF i2c1_state, ACCESS
+422:                           }
+423:                       }
+424:                       break;
+0228  0012     RETURN 0
+425:           
+426:                   case S_MASTER_SEND_DATA:
+427:           
+428:                       // Make sure the previous byte was acknowledged
+429:                       if(I2C1_ACKNOWLEDGE_STATUS_BIT)
+022A  AC97     BTFSS SSP1CON2, 6, ACCESS
+022C  D006     BRA 0x23A
+430:                       {
+431:                           // Transmission was not acknowledged
+432:                           i2c1_object.i2cErrors++;
+022E  2A07     INCF 0x7, F, ACCESS
+433:           
+434:                           // Reset the Ack flag
+435:                           I2C1_ACKNOWLEDGE_STATUS_BIT = 0;
+0230  9C97     BCF SSP1CON2, 6, ACCESS
+436:           
+437:                           // Send a stop flag and go back to idle
+438:                           I2C1_Stop(I2C1_DATA_NO_ACK);
+0232  0E05     MOVLW 0x5
+0234  EC73     CALL 0x8E6, 0
+0236  F004     NOP
+439:           
+440:                       }
+0238  0012     RETURN 0
+441:                       else
+442:                       {
+443:                           // Did we send them all ?
+444:                           if(i2c_bytes_left-- == 0U)
+023A  0614     DECF i2c_bytes_left, F, ACCESS
+023C  2814     INCF i2c_bytes_left, W, ACCESS
+023E  A4D8     BTFSS STATUS, 2, ACCESS
+0240  D00E     BRA 0x25E
+445:                           {
+446:                               // yup sent them all!
+447:           
+448:                               // update the trb pointer
+449:                               p_i2c1_trb_current++;
+0242  0E05     MOVLW 0x5
+0244  260C     ADDWF p_i2c1_trb_current, F, ACCESS
+0246  0E00     MOVLW 0x0
+0248  220D     ADDWFC 0xD, F, ACCESS
+450:           
+451:                               // are we done with this string of requests?
+452:                               if(--i2c1_trb_count == 0)
+024A  2E15     DECFSZ i2c1_trb_count, F, ACCESS
+024C  D004     BRA 0x256
+453:                               {
+454:                                   I2C1_Stop(I2C1_MESSAGE_COMPLETE);
+024E  0E00     MOVLW 0x0
+0250  EC73     CALL 0x8E6, 0
+0252  F004     NOP
+455:                               }
+0254  0012     RETURN 0
+456:                               else
+457:                               {
+458:                                   // no!, there are more TRB to be sent.
+459:                                   //I2C1_START_CONDITION_ENABLE_BIT = 1;
+460:           
+461:                                   // In some cases, the slave may require
+462:                                   // a restart instead of a start. So use this one
+463:                                   // instead.
+464:                                   I2C1_REPEAT_START_CONDITION_ENABLE_BIT = 1;
+0256  8297     BSF SSP1CON2, 1, ACCESS
+465:           
+466:                                   // start the i2c request
+467:                                   i2c1_state = S_MASTER_SEND_ADDR;
+0258  0E02     MOVLW 0x2
+025A  6E16     MOVWF i2c1_state, ACCESS
+468:           
+469:                               }
+470:                           }
+025C  0012     RETURN 0
+471:                           else
+472:                           {
+473:                               // Grab the next data to transmit
+474:                               I2C1_TRANSMIT_REG = *pi2c_buf_ptr++;
+025E  C008     MOVFF pi2c_buf_ptr, FSR2
+0260  FFD9     NOP
+0262  C009     MOVFF 0x9, FSR2H
+0264  FFDA     NOP
+0266  50DF     MOVF INDF2, W, ACCESS
+0268  6E92     MOVWF SSP1BUF, ACCESS
+026A  4A08     INFSNZ pi2c_buf_ptr, F, ACCESS
+026C  2A09     INCF 0x9, F, ACCESS
+475:                           }
+476:                       }
+477:                       break;
+026E  0012     RETURN 0
+478:           
+479:                   case S_MASTER_ACK_ADDR:
+480:           
+481:                       /* Make sure the previous byte was acknowledged */
+482:                       if(I2C1_ACKNOWLEDGE_STATUS_BIT)
+0270  AC97     BTFSS SSP1CON2, 6, ACCESS
+0272  D006     BRA 0x280
+483:                       {
+484:           
+485:                           // Transmission was not acknowledged
+486:                           i2c1_object.i2cErrors++;
+0274  2A07     INCF 0x7, F, ACCESS
+487:           
+488:                           // Send a stop flag and go back to idle
+489:                           I2C1_Stop(I2C1_MESSAGE_ADDRESS_NO_ACK);
+0276  0E04     MOVLW 0x4
+0278  EC73     CALL 0x8E6, 0
+027A  F004     NOP
+490:           
+491:                           // Reset the Ack flag
+492:                           I2C1_ACKNOWLEDGE_STATUS_BIT = 0;
+027C  9C97     BCF SSP1CON2, 6, ACCESS
+493:                       }
+027E  0012     RETURN 0
+494:                       else
+495:                       {
+496:                           I2C1_RECEIVE_ENABLE_BIT = 1;
+0280  8697     BSF SSP1CON2, 3, ACCESS
+497:                           i2c1_state = S_MASTER_ACK_RCV_DATA;
+0282  0E08     MOVLW 0x8
+0284  6E16     MOVWF i2c1_state, ACCESS
+498:                       }
+499:                       break;
+0286  0012     RETURN 0
+500:           
+501:                   case S_MASTER_RCV_DATA:
+502:           
+503:                       /* Acknowledge is completed.  Time for more data */
+504:           
+505:                       // Next thing is to ack the data
+506:                       i2c1_state = S_MASTER_ACK_RCV_DATA;
+0288  0E08     MOVLW 0x8
+028A  6E16     MOVWF i2c1_state, ACCESS
+507:           
+508:                       // Set up to receive a byte of data
+509:                       I2C1_RECEIVE_ENABLE_BIT = 1;
+028C  8697     BSF SSP1CON2, 3, ACCESS
+510:           
+511:                       break;
+028E  0012     RETURN 0
+512:           
+513:                   case S_MASTER_ACK_RCV_DATA:
+514:           
+515:                       // Grab the byte of data received and acknowledge it
+516:                       *pi2c_buf_ptr++ = I2C1_RECEIVE_REG;
+0290  C008     MOVFF pi2c_buf_ptr, FSR2
+0292  FFD9     NOP
+0294  C009     MOVFF 0x9, FSR2H
+0296  FFDA     NOP
+0298  CF92     MOVFF SSP1BUF, INDF2
+029A  FFDF     NOP
+029C  4A08     INFSNZ pi2c_buf_ptr, F, ACCESS
+029E  2A09     INCF 0x9, F, ACCESS
+517:           
+518:                       // Check if we received them all?
+519:                       if(--i2c_bytes_left)
+02A0  0E01     MOVLW 0x1
+02A2  5E14     SUBWF i2c_bytes_left, F, ACCESS
+02A4  B4D8     BTFSC STATUS, 2, ACCESS
+02A6  D004     BRA 0x2B0
+520:                       {
+521:           
+522:                           /* No, there's more to receive */
+523:           
+524:                           // No, bit 7 is clear.  Data is ok
+525:                           // Set the flag to acknowledge the data
+526:                           I2C1_ACKNOWLEDGE_DATA_BIT = 0;
+02A8  9A97     BCF SSP1CON2, 5, ACCESS
+527:           
+528:                           // Wait for the acknowledge to complete, then get more
+529:                           i2c1_state = S_MASTER_RCV_DATA;
+02AA  0E06     MOVLW 0x6
+02AC  6E16     MOVWF i2c1_state, ACCESS
+530:                       }
+02AE  D003     BRA 0x2B6
+531:                       else
+532:                       {
+533:           
+534:                           // Yes, it's the last byte.  Don't ack it
+535:                           // Flag that we will nak the data
+536:                           I2C1_ACKNOWLEDGE_DATA_BIT = 1;
+02B0  8A97     BSF SSP1CON2, 5, ACCESS
+537:           
+538:                           I2C1_FunctionComplete();
+02B2  EC17     CALL 0xA2E, 0
+02B4  F005     NOP
+539:                       }
+540:           
+541:                       // Initiate the acknowledge
+542:                       I2C1_ACKNOWLEDGE_ENABLE_BIT = 1;
+02B6  8897     BSF SSP1CON2, 4, ACCESS
+543:                       break;
+02B8  0012     RETURN 0
+544:           
+545:                   case S_MASTER_RCV_STOP:                
+546:                   case S_MASTER_SEND_STOP:
+547:           
+548:                       // Send the stop flag
+549:                       I2C1_Stop(I2C1_MESSAGE_COMPLETE);
+02BA  0E00     MOVLW 0x0
+02BC  EC73     CALL 0x8E6, 0
+02BE  F004     NOP
+550:                       break;
+02C0  0012     RETURN 0
+551:           
+552:                   default:
+553:           
+554:                       // This case should not happen, if it does then
+555:                       // terminate the transfer
+556:                       i2c1_object.i2cErrors++;
+02C2  2A07     INCF 0x7, F, ACCESS
+557:                       I2C1_Stop(I2C1_LOST_STATE);
+02C4  0E06     MOVLW 0x6
+02C6  EC73     CALL 0x8E6, 0
+02C8  F004     NOP
+558:                       break;
+559:           
+560:               }
+02CA  0012     RETURN 0
+02CC  5016     MOVF i2c1_state, W, ACCESS
+02CE  0A00     XORLW 0x0
+02D0  B4D8     BTFSC STATUS, 2, ACCESS
+02D2  D71B     BRA 0x10A
+02D4  0A01     XORLW 0x1
+02D6  B4D8     BTFSC STATUS, 2, ACCESS
+02D8  D749     BRA 0x16C
+02DA  0A03     XORLW 0x3
+02DC  B4D8     BTFSC STATUS, 2, ACCESS
+02DE  D77E     BRA 0x1DC
+02E0  0A01     XORLW 0x1
+02E2  B4D8     BTFSC STATUS, 2, ACCESS
+02E4  D7A2     BRA 0x22A
+02E6  0A07     XORLW 0x7
+02E8  B4D8     BTFSC STATUS, 2, ACCESS
+02EA  D7E7     BRA 0x2BA
+02EC  0A01     XORLW 0x1
+02EE  B4D8     BTFSC STATUS, 2, ACCESS
+02F0  D7BF     BRA 0x270
+02F2  0A03     XORLW 0x3
+02F4  B4D8     BTFSC STATUS, 2, ACCESS
+02F6  D7C8     BRA 0x288
+02F8  0A01     XORLW 0x1
+02FA  B4D8     BTFSC STATUS, 2, ACCESS
+02FC  D7DE     BRA 0x2BA
+02FE  0A0F     XORLW 0xF
+0300  B4D8     BTFSC STATUS, 2, ACCESS
+0302  D7C6     BRA 0x290
+0304  0A02     XORLW 0x2
+0306  B4D8     BTFSC STATUS, 2, ACCESS
+0308  D735     BRA 0x174
+030A  0A01     XORLW 0x1
+030C  B4D8     BTFSC STATUS, 2, ACCESS
+030E  D748     BRA 0x1A0
+0310  D7D8     BRA 0x2C2
+561:           }
+562:           
+563:           void I2C1_FunctionComplete(void)
+564:           {
+565:           
+566:               // update the trb pointer
+567:               p_i2c1_trb_current++;
+0A2E  0E05     MOVLW 0x5
+0A30  260C     ADDWF p_i2c1_trb_current, F, ACCESS
+0A32  0E00     MOVLW 0x0
+0A34  220D     ADDWFC 0xD, F, ACCESS
+568:           
+569:               // are we done with this string of requests?
+570:               if(--i2c1_trb_count == 0)
+0A36  2E15     DECFSZ i2c1_trb_count, F, ACCESS
+0A38  D003     BRA 0xA40
+571:               {
+572:                   i2c1_state = S_MASTER_SEND_STOP;
+0A3A  0E04     MOVLW 0x4
+0A3C  6E16     MOVWF i2c1_state, ACCESS
+573:               }
+0A3E  0012     RETURN 0
+574:               else
+575:               {
+576:                   i2c1_state = S_MASTER_RESTART;
+0A40  0E01     MOVLW 0x1
+0A42  6E16     MOVWF i2c1_state, ACCESS
+0A44  0012     RETURN 0
+577:               }
+578:           
+579:           }
+580:           
+581:           void I2C1_Stop(I2C1_MESSAGE_STATUS completion_code)
+08E6  6E2C     MOVWF completion_code, ACCESS
+582:           {
+583:               // then send a stop
+584:               I2C1_STOP_CONDITION_ENABLE_BIT = 1;
+08E8  8497     BSF SSP1CON2, 2, ACCESS
+585:           
+586:               // make sure the flag pointer is not NULL
+587:               if (p_i2c1_current->pTrFlag != NULL)
+08EA  EE20     LFSR 2, 0x3
+08EC  F003     NOP
+08EE  500A     MOVF p_i2c1_current, W, ACCESS
+08F0  26D9     ADDWF FSR2, F, ACCESS
+08F2  500B     MOVF 0xB, W, ACCESS
+08F4  22DA     ADDWFC FSR2H, F, ACCESS
+08F6  50DE     MOVF POSTINC2, W, ACCESS
+08F8  10DE     IORWF POSTINC2, W, ACCESS
+08FA  B4D8     BTFSC STATUS, 2, ACCESS
+08FC  D010     BRA 0x91E
+588:               {
+589:                   // update the flag with the completion code
+590:                   *(p_i2c1_current->pTrFlag) = completion_code;
+08FE  EE20     LFSR 2, 0x3
+0900  F003     NOP
+0902  500A     MOVF p_i2c1_current, W, ACCESS
+0904  26D9     ADDWF FSR2, F, ACCESS
+0906  500B     MOVF 0xB, W, ACCESS
+0908  22DA     ADDWFC FSR2H, F, ACCESS
+090A  CFDE     MOVFF POSTINC2, __pcstackCOMRAM
+090C  F02A     NOP
+090E  CFDD     MOVFF POSTDEC2, i2c_data
+0910  F02B     NOP
+0912  C02A     MOVFF __pcstackCOMRAM, FSR2
+0914  FFD9     NOP
+0916  C02B     MOVFF i2c_data, FSR2H
+0918  FFDA     NOP
+091A  C02C     MOVFF completion_code, INDF2
+091C  FFDF     NOP
+591:               }
+592:           
+593:               // Done, back to idle
+594:               i2c1_state = S_MASTER_IDLE;
+091E  0E00     MOVLW 0x0
+0920  6E16     MOVWF i2c1_state, ACCESS
+595:               
+596:           }
+0922  0012     RETURN 0
+597:           
+598:           void I2C1_MasterWrite(
+599:                                           uint8_t *pdata,
+600:                                           uint8_t length,
+601:                                           uint16_t address,
+602:                                           I2C1_MESSAGE_STATUS *pflag)
+603:           {
+604:               static I2C1_TRANSACTION_REQUEST_BLOCK   trBlock;
+605:           
+606:               // check if there is space in the queue
+607:               if (i2c1_object.trStatus.s.full != true)
+07FE  B005     BTFSC 0x5, 0, ACCESS
+0800  D020     BRA 0x842
+608:               {
+609:                   I2C1_MasterWriteTRBBuild(&trBlock, pdata, length, address);
+0802  0E1E     MOVLW 0x1E
+0804  0100     MOVLB 0x0
+0806  6FF0     MOVWF __pcstackBANK0, BANKED
+0808  0E00     MOVLW 0x0
+080A  0100     MOVLB 0x0
+080C  6FF1     MOVWF 0xF1, BANKED
+080E  C0F9     MOVFF pdata, pflag
+0810  F0F2     NOP
+0812  C0FA     MOVFF 0xFA, 0xF3
+0814  F0F3     NOP
+0816  C0FB     MOVFF length, length
+0818  F0F4     NOP
+081A  C0FC     MOVFF address, count
+081C  F0F5     NOP
+081E  C0FD     MOVFF 0xFD, 0xF6
+0820  F0F6     NOP
+0822  EC4E     CALL 0x89C, 0
+0824  F004     NOP
+610:                   I2C1_MasterTRBInsert(1, &trBlock, pflag);
+0826  0E1E     MOVLW 0x1E
+0828  0100     MOVLB 0x0
+082A  6FF0     MOVWF __pcstackBANK0, BANKED
+082C  0E00     MOVLW 0x0
+082E  0100     MOVLB 0x0
+0830  6FF1     MOVWF 0xF1, BANKED
+0832  C0FE     MOVFF pflag, pflag
+0834  F0F2     NOP
+0836  C0FF     MOVFF 0xFF, 0xF3
+0838  F0F3     NOP
+083A  0E01     MOVLW 0x1
+083C  ECF7     CALL 0x5EE, 0
+083E  F002     NOP
+611:               }
+0840  0012     RETURN 0
+612:               else
+613:               {
+614:                   *pflag = I2C1_MESSAGE_FAIL;
+0842  C0FE     MOVFF pflag, FSR2
+0844  FFD9     NOP
+0846  C0FF     MOVFF 0xFF, FSR2H
+0848  FFDA     NOP
+084A  0E01     MOVLW 0x1
+084C  6EDF     MOVWF INDF2, ACCESS
+084E  0012     RETURN 0
+615:               }
+616:           
+617:           }
+618:           
+619:           void I2C1_MasterRead(
+620:                                           uint8_t *pdata,
+621:                                           uint8_t length,
+622:                                           uint16_t address,
+623:                                           I2C1_MESSAGE_STATUS *pflag)
+624:           {
+625:               static I2C1_TRANSACTION_REQUEST_BLOCK   trBlock;
+626:           
+627:           
+628:               // check if there is space in the queue
+629:               if (i2c1_object.trStatus.s.full != true)
+630:               {
+631:                   I2C1_MasterReadTRBBuild(&trBlock, pdata, length, address);
+632:                   I2C1_MasterTRBInsert(1, &trBlock, pflag);
+633:               }
+634:               else
+635:               {
+636:                   *pflag = I2C1_MESSAGE_FAIL;
+637:               }
+638:           
+639:           }
+640:           
+641:           void I2C1_MasterTRBInsert(
+642:                                           uint8_t count,
+05EE  0100     MOVLB 0x0
+05F0  6FF5     MOVWF count, BANKED
+643:                                           I2C1_TRANSACTION_REQUEST_BLOCK *ptrb_list,
+644:                                           I2C1_MESSAGE_STATUS *pflag)
+645:           {
+646:           
+647:               // check if there is space in the queue
+648:               if (i2c1_object.trStatus.s.full != true)
+05F2  B005     BTFSC 0x5, 0, ACCESS
+05F4  D039     BRA 0x668
+649:               {
+650:                   *pflag = I2C1_MESSAGE_PENDING;
+05F6  C0F2     MOVFF pflag, FSR2
+05F8  FFD9     NOP
+05FA  C0F3     MOVFF 0xF3, FSR2H
+05FC  FFDA     NOP
+05FE  0E02     MOVLW 0x2
+0600  6EDF     MOVWF INDF2, ACCESS
+651:           
+652:                   i2c1_object.pTrTail->ptrb_list = ptrb_list;
+0602  EE20     LFSR 2, 0x1
+0604  F001     NOP
+0606  5001     MOVF i2c1_object, W, ACCESS
+0608  26D9     ADDWF FSR2, F, ACCESS
+060A  5002     MOVF 0x2, W, ACCESS
+060C  22DA     ADDWFC FSR2H, F, ACCESS
+060E  C0F0     MOVFF __pcstackBANK0, POSTINC2
+0610  FFDE     NOP
+0612  C0F1     MOVFF 0xF1, POSTDEC2
+0614  FFDD     NOP
+653:                   i2c1_object.pTrTail->count     = count;
+0616  C001     MOVFF i2c1_object, FSR2
+0618  FFD9     NOP
+061A  C002     MOVFF 0x2, FSR2H
+061C  FFDA     NOP
+061E  C0F5     MOVFF count, INDF2
+0620  FFDF     NOP
+654:                   i2c1_object.pTrTail->pTrFlag   = pflag;
+0622  EE20     LFSR 2, 0x3
+0624  F003     NOP
+0626  5001     MOVF i2c1_object, W, ACCESS
+0628  26D9     ADDWF FSR2, F, ACCESS
+062A  5002     MOVF 0x2, W, ACCESS
+062C  22DA     ADDWFC FSR2H, F, ACCESS
+062E  C0F2     MOVFF pflag, POSTINC2
+0630  FFDE     NOP
+0632  C0F3     MOVFF 0xF3, POSTDEC2
+0634  FFDD     NOP
+655:                   i2c1_object.pTrTail++;
+0636  0E05     MOVLW 0x5
+0638  2601     ADDWF i2c1_object, F, ACCESS
+063A  0E00     MOVLW 0x0
+063C  2202     ADDWFC 0x2, F, ACCESS
+656:           
+657:                   // check if the end of the array is reached
+658:                   if (i2c1_object.pTrTail == (i2c1_tr_queue + I2C1_CONFIG_TR_QUEUE_LENGTH))
+063E  0E28     MOVLW 0x28
+0640  1801     XORWF i2c1_object, W, ACCESS
+0642  E108     BNZ 0x654
+0644  0E00     MOVLW 0x0
+0646  1802     XORWF 0x2, W, ACCESS
+0648  A4D8     BTFSS STATUS, 2, ACCESS
+064A  D004     BRA 0x654
+659:                   {
+660:                       // adjust to restart at the beginning of the array
+661:                       i2c1_object.pTrTail = i2c1_tr_queue;
+064C  0E23     MOVLW 0x23
+064E  6E01     MOVWF i2c1_object, ACCESS
+0650  0E00     MOVLW 0x0
+0652  6E02     MOVWF 0x2, ACCESS
+662:                   }
+663:           
+664:                   // since we added one item to be processed, we know
+665:                   // it is not empty, so set the empty status to false
+666:                   i2c1_object.trStatus.s.empty = false;
+0654  9205     BCF 0x5, 1, ACCESS
+667:           
+668:                   // check if full
+669:                   if (i2c1_object.pTrHead == i2c1_object.pTrTail)
+0656  5001     MOVF i2c1_object, W, ACCESS
+0658  1803     XORWF 0x3, W, ACCESS
+065A  E10C     BNZ 0x674
+065C  5002     MOVF 0x2, W, ACCESS
+065E  1804     XORWF 0x4, W, ACCESS
+0660  A4D8     BTFSS STATUS, 2, ACCESS
+0662  D008     BRA 0x674
+670:                   {
+671:                       // it is full, set the full status to true
+672:                       i2c1_object.trStatus.s.full = true;
+0664  8005     BSF 0x5, 0, ACCESS
+673:                   }
+674:           
+675:               }
+0666  D006     BRA 0x674
+676:               else
+677:               {
+678:                   *pflag = I2C1_MESSAGE_FAIL;
+0668  C0F2     MOVFF pflag, FSR2
+066A  FFD9     NOP
+066C  C0F3     MOVFF 0xF3, FSR2H
+066E  FFDA     NOP
+0670  0E01     MOVLW 0x1
+0672  6EDF     MOVWF INDF2, ACCESS
+679:               }
+680:           
+681:               // for interrupt based
+682:               if (*pflag == I2C1_MESSAGE_PENDING)
+0674  C0F2     MOVFF pflag, FSR2
+0676  FFD9     NOP
+0678  C0F3     MOVFF 0xF3, FSR2H
+067A  FFDA     NOP
+067C  0E02     MOVLW 0x2
+067E  18DE     XORWF POSTINC2, W, ACCESS
+0680  A4D8     BTFSS STATUS, 2, ACCESS
+0682  0012     RETURN 0
+683:               {
+684:                   while(i2c1_state != S_MASTER_IDLE);
+0684  5016     MOVF i2c1_state, W, ACCESS
+0686  A4D8     BTFSS STATUS, 2, ACCESS
+0688  D7FD     BRA 0x684
+685:                   {
+686:                       // force the task to run since we know that the queue has
+687:                       // something that needs to be sent
+688:                       PIR3bits.SSP1IF = true;
+068A  010E     MOVLB 0xE
+068C  81CD     BSF 0xCD, 0, BANKED
+068E  0012     RETURN 0
+689:                   }
+690:               }   // block until request is complete
+691:           
+692:           }
+693:           
+694:           void I2C1_MasterReadTRBBuild(
+695:                                           I2C1_TRANSACTION_REQUEST_BLOCK *ptrb,
+696:                                           uint8_t *pdata,
+697:                                           uint8_t length,
+698:                                           uint16_t address)
+699:           {
+700:               ptrb->address  = address << 1;
+701:               // make this a read
+702:               ptrb->address |= 0x01;
+703:               ptrb->length   = length;
+704:               ptrb->pbuffer  = pdata;
+705:           }
+706:           
+707:           void I2C1_MasterWriteTRBBuild(
+708:                                           I2C1_TRANSACTION_REQUEST_BLOCK *ptrb,
+709:                                           uint8_t *pdata,
+710:                                           uint8_t length,
+711:                                           uint16_t address)
+712:           {
+713:               ptrb->address = address << 1;
+089C  C0F5     MOVFF count, 0xF7
+089E  F0F7     NOP
+08A0  C0F6     MOVFF 0xF6, 0xF8
+08A2  F0F8     NOP
+08A4  90D8     BCF STATUS, 0, ACCESS
+08A6  0100     MOVLB 0x0
+08A8  37F7     RLCF 0xF7, F, BANKED
+08AA  37F8     RLCF 0xF8, F, BANKED
+08AC  C0F0     MOVFF __pcstackBANK0, FSR2
+08AE  FFD9     NOP
+08B0  C0F1     MOVFF 0xF1, FSR2H
+08B2  FFDA     NOP
+08B4  C0F7     MOVFF 0xF7, POSTINC2
+08B6  FFDE     NOP
+08B8  C0F8     MOVFF 0xF8, POSTDEC2
+08BA  FFDD     NOP
+714:               ptrb->length  = length;
+08BC  0100     MOVLB 0x0
+08BE  EE20     LFSR 2, 0x2
+08C0  F002     NOP
+08C2  51F0     MOVF __pcstackBANK0, W, BANKED
+08C4  26D9     ADDWF FSR2, F, ACCESS
+08C6  51F1     MOVF 0xF1, W, BANKED
+08C8  22DA     ADDWFC FSR2H, F, ACCESS
+08CA  C0F4     MOVFF length, INDF2
+08CC  FFDF     NOP
+715:               ptrb->pbuffer = pdata;
+08CE  0100     MOVLB 0x0
+08D0  EE20     LFSR 2, 0x3
+08D2  F003     NOP
+08D4  51F0     MOVF __pcstackBANK0, W, BANKED
+08D6  26D9     ADDWF FSR2, F, ACCESS
+08D8  51F1     MOVF 0xF1, W, BANKED
+08DA  22DA     ADDWFC FSR2H, F, ACCESS
+08DC  C0F2     MOVFF pflag, POSTINC2
+08DE  FFDE     NOP
+08E0  C0F3     MOVFF 0xF3, POSTDEC2
+08E2  FFDD     NOP
+716:           }
+08E4  0012     RETURN 0
+717:           
+718:           bool I2C1_MasterQueueIsEmpty(void)
+719:           {
+720:               return(i2c1_object.trStatus.s.empty);
+0A46  A205     BTFSS 0x5, 1, ACCESS
+0A48  D002     BRA 0xA4E
+0A4A  0E01     MOVLW 0x1
+0A4C  0012     RETURN 0
+0A4E  0E00     MOVLW 0x0
+0A50  0012     RETURN 0
+721:           }
+0008  824B     BSF btemp, 1, ACCESS
+722:           
+723:           bool I2C1_MasterQueueIsFull(void)
+724:           {
+725:               return(i2c1_object.trStatus.s.full);
+726:           }        
+727:                   
+728:           void I2C1_BusCollisionISR( void )
+729:           {
+730:               // enter bus collision handling code here
+731:           }        
+0A72  0012     RETURN 0
+732:                   
+733:                   
+734:           /**
+735:            End of File
+736:           */
+---  /home/kruntz/Work/oltreNoi/MPLABXProjects/EncoderBaySlave.X/main.c  --------------------------------
+1:             /**
+2:               Generated Main Source File
+3:             
+4:               Company:
+5:                 Microchip Technology Inc.
+6:             
+7:               File Name:
+8:                 main.c
+9:             
+10:              Summary:
+11:                This is the main file generated using MPLAB(c) Code Configurator
+12:            
+13:              Description:
+14:                This header file provides implementations for driver APIs for all modules selected in the GUI.
+15:                Generation Information :
+16:                    Product Revision  :  MPLAB(c) Code Configurator - 4.15
+17:                    Device            :  PIC18F46K40
+18:                    Driver Version    :  2.00
+19:                The generated drivers are tested against the following:
+20:                    Compiler          :  XC8 1.35
+21:                    MPLAB             :  MPLAB X 3.40
+22:             */
+23:            
+24:            /*
+25:                (c) 2016 Microchip Technology Inc. and its subsidiaries. You may use this
+26:                software and any derivatives exclusively with Microchip products.
+27:            
+28:                THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
+29:                EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY IMPLIED
+30:                WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS FOR A
+31:                PARTICULAR PURPOSE, OR ITS INTERACTION WITH MICROCHIP PRODUCTS, COMBINATION
+32:                WITH ANY OTHER PRODUCTS, OR USE IN ANY APPLICATION.
+33:            
+34:                IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE,
+35:                INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND
+36:                WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP HAS
+37:                BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE. TO THE
+38:                FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL CLAIMS IN
+39:                ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT OF FEES, IF ANY,
+40:                THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
+41:            
+42:                MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE
+43:                TERMS.
+44:             */
+45:            
+46:            #include "mcc_generated_files/mcc.h"
+47:            #include "encoder.h"
+48:            
+49:            /*
+50:                                     Main application
+51:             */
+52:            void main(void) {
+53:                // Initialize the device
+54:                SYSTEM_Initialize();
+09F6  EC0A     CALL 0xA14, 0
+09F8  F005     NOP
+55:            
+56:                TMR0_SetInterruptHandler(TMR0_EncoderInterruptHandler);
+09FA  0E0A     MOVLW 0xA
+09FC  0100     MOVLB 0x0
+09FE  6FF0     MOVWF __pcstackBANK0, BANKED
+0A00  0E05     MOVLW 0x5
+0A02  0100     MOVLB 0x0
+0A04  6FF1     MOVWF 0xF1, BANKED
+0A06  EC2F     CALL 0xA5E, 0
+0A08  F005     NOP
+57:                
+58:                // If using interrupts in PIC18 High/Low Priority Mode you need to enable the Global High and Low Interrupts
+59:                // If using interrupts in PIC Mid-Range Compatibility Mode you need to enable the Global and Peripheral Interrupts
+60:                // Use the following macros to:
+61:            
+62:                // Enable high priority global interrupts
+63:                //INTERRUPT_GlobalInterruptHighEnable();
+64:            
+65:                // Enable low priority global interrupts.
+66:                //INTERRUPT_GlobalInterruptLowEnable();
+67:            
+68:                // Disable high priority global interrupts
+69:                //INTERRUPT_GlobalInterruptHighDisable();
+70:            
+71:                // Disable low priority global interrupts.
+72:                //INTERRUPT_GlobalInterruptLowDisable();
+73:            
+74:                // Enable the Global Interrupts
+75:                INTERRUPT_GlobalInterruptEnable();
+0A0A  8EF2     BSF INTCON, 7, ACCESS
+76:            
+77:                // Enable the Peripheral Interrupts
+78:                INTERRUPT_PeripheralInterruptEnable();
+0A0C  8CF2     BSF INTCON, 6, ACCESS
+79:            
+80:                // Disable the Global Interrupts
+81:                //INTERRUPT_GlobalInterruptDisable();
+82:            
+83:                // Disable the Peripheral Interrupts
+84:                //INTERRUPT_PeripheralInterruptDisable();
+85:            
+86:                while (1) {
+0A12  D7FD     BRA 0xA0E
+87:                    DecodePushEncoder();
+0A0E  EC89     CALL 0x312, 0
+0A10  F001     NOP
+0A12  D7FD     BRA 0xA0E
+88:                }
+89:            }
+90:            /**
+91:             End of File
+92:             */
+---  /home/kruntz/Work/oltreNoi/MPLABXProjects/EncoderBaySlave.X/encoder.c  -----------------------------
+1:             #include "mcc_generated_files/mcc.h"
+2:             #include "encoder.h"
+3:             
+4:             /*
+5:             Transition  Valid?  Move
+6:             00  0000	No      0
+7:             01  0001	CCW    -1
+8:             02  0010	CW      1
+9:             03  0011	No      0
+10:            04  0100	CW      1
+11:            05  0101	No      0
+12:            06  0110	No      0
+13:            07  0111	CCW    -1
+14:            08  1000	CCW    -1
+15:            09  1001	No      0
+16:            10  1010	No      0
+17:            11  1011	CW      1
+18:            12  1100	No      0
+19:            13  1101	CW      1
+20:            14  1110	CCW    -1
+21:            15  1111	No      0
+22:             */
+23:            
+24:            int8_t buttonState = 0;
+25:            int8_t encoderSteps = 0;
+26:            uint8_t encoderPeriod = 0;
+27:            
+28:            void TMR0_EncoderInterruptHandler(void) {
+29:                IO_RB4_Toggle();
+050A  A884     BTFSS LATB, 4, ACCESS
+050C  D002     BRA 0x512
+050E  0E01     MOVLW 0x1
+0510  D001     BRA 0x514
+0512  0E00     MOVLW 0x0
+0514  0AFF     XORLW 0xFF
+0516  6E2A     MOVWF __pcstackCOMRAM, ACCESS
+0518  3A2A     SWAPF __pcstackCOMRAM, F, ACCESS
+051A  5084     MOVF LATB, W, ACCESS
+051C  182A     XORWF __pcstackCOMRAM, W, ACCESS
+051E  0BEF     ANDLW 0xEF
+0520  182A     XORWF __pcstackCOMRAM, W, ACCESS
+0522  6E84     MOVWF LATB, ACCESS
+30:                //    IO_RB5_SetHigh();
+31:            
+32:                // ---------- Read button state
+33:                static int8_t buttonStates[] = {0, 0, 0, 1, -1, 0, 0, 0};
+34:                static uint8_t oldButtonState = 0;
+35:            
+36:                // Remember previous state
+37:                oldButtonState <<= 1;
+0524  90D8     BCF STATUS, 0, ACCESS
+0526  360F     RLCF oldButtonState, F, ACCESS
+38:                // Add actual state
+39:                oldButtonState |= ENC_00_P_GetValue();
+0528  A08D     BTFSS PORTA, 0, ACCESS
+052A  D002     BRA 0x530
+052C  0E01     MOVLW 0x1
+052E  D001     BRA 0x532
+0530  0E00     MOVLW 0x0
+0532  120F     IORWF oldButtonState, F, ACCESS
+40:                // Indexed state (de-bounce with at least two consecutive identical states)
+41:                buttonState = buttonStates[(oldButtonState & 0x07)];
+0534  500F     MOVF oldButtonState, W, ACCESS
+0536  0B07     ANDLW 0x7
+0538  6E2A     MOVWF __pcstackCOMRAM, ACCESS
+053A  6A2B     CLRF i2c_data, ACCESS
+053C  0E3E     MOVLW 0x3E
+053E  242A     ADDWF __pcstackCOMRAM, W, ACCESS
+0540  6ED9     MOVWF FSR2, ACCESS
+0542  0E00     MOVLW 0x0
+0544  202B     ADDWFC i2c_data, W, ACCESS
+0546  6EDA     MOVWF FSR2H, ACCESS
+0548  50DF     MOVF INDF2, W, ACCESS
+054A  6E12     MOVWF buttonState, ACCESS
+42:            
+43:                // ---------- Read encoder state
+44:                static int8_t encoderStates[] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0};
+45:                static uint8_t oldEncoderState = 0;
+46:            
+47:                // Remember previous state
+48:                oldEncoderState <<= 2;
+054C  90D8     BCF STATUS, 0, ACCESS
+054E  360E     RLCF oldEncoderState, F, ACCESS
+0550  90D8     BCF STATUS, 0, ACCESS
+0552  360E     RLCF oldEncoderState, F, ACCESS
+49:                // Add actual state
+50:                oldEncoderState |= (ENC_00_B_GetValue());
+0554  A28F     BTFSS PORTC, 1, ACCESS
+0556  D002     BRA 0x55C
+0558  0E01     MOVLW 0x1
+055A  D001     BRA 0x55E
+055C  0E00     MOVLW 0x0
+055E  120E     IORWF oldEncoderState, F, ACCESS
+51:                oldEncoderState |= (ENC_00_A_GetValue() << 1);
+0560  A08F     BTFSS PORTC, 0, ACCESS
+0562  D003     BRA 0x56A
+0564  6A2A     CLRF __pcstackCOMRAM, ACCESS
+0566  2A2A     INCF __pcstackCOMRAM, F, ACCESS
+0568  D001     BRA 0x56C
+056A  6A2A     CLRF __pcstackCOMRAM, ACCESS
+056C  90D8     BCF STATUS, 0, ACCESS
+056E  342A     RLCF __pcstackCOMRAM, W, ACCESS
+0570  120E     IORWF oldEncoderState, F, ACCESS
+52:                // Indexed state (de-bounce with at least two consecutive identical states)
+53:                encoderSteps += encoderStates[(oldEncoderState & 0x0f)];
+0572  500E     MOVF oldEncoderState, W, ACCESS
+0574  0B0F     ANDLW 0xF
+0576  6E2A     MOVWF __pcstackCOMRAM, ACCESS
+0578  6A2B     CLRF i2c_data, ACCESS
+057A  0EE0     MOVLW 0xE0
+057C  242A     ADDWF __pcstackCOMRAM, W, ACCESS
+057E  6ED9     MOVWF FSR2, ACCESS
+0580  0E00     MOVLW 0x0
+0582  202B     ADDWFC i2c_data, W, ACCESS
+0584  6EDA     MOVWF FSR2H, ACCESS
+0586  50DF     MOVF INDF2, W, ACCESS
+0588  2611     ADDWF encoderSteps, F, ACCESS
+54:                if (encoderPeriod < UINT8_MAX) {
+058A  2810     INCF encoderPeriod, W, ACCESS
+058C  A4D8     BTFSS STATUS, 2, ACCESS
+55:                    encoderPeriod++;
+058E  2A10     INCF encoderPeriod, F, ACCESS
+56:                }
+57:            
+58:                int i;
+59:                for (i = 0; i < (encoderSteps < 0 ? (-encoderSteps) : encoderSteps); i++) {
+0590  0E00     MOVLW 0x0
+0592  6E2D     MOVWF 0x2D, ACCESS
+0594  0E00     MOVLW 0x0
+0596  6E2C     MOVWF completion_code, ACCESS
+0598  D00A     BRA 0x5AE
+05AA  4A2C     INFSNZ completion_code, F, ACCESS
+60:                    IO_RB5_SetHigh();
+059A  8A84     BSF LATB, 5, ACCESS
+61:                    Nop();
+059C  F000     NOP
+62:                    Nop();
+059E  F000     NOP
+63:                    Nop();
+05A0  F000     NOP
+64:                    IO_RB5_SetLow();
+05A2  9A84     BCF LATB, 5, ACCESS
+65:                    Nop();
+05A4  F000     NOP
+66:                    Nop();
+05A6  F000     NOP
+67:                    Nop();
+05A8  F000     NOP
+05AA  4A2C     INFSNZ completion_code, F, ACCESS
+05AC  2A2D     INCF 0x2D, F, ACCESS
+05AE  BE11     BTFSC encoderSteps, 7, ACCESS
+05B0  D006     BRA 0x5BE
+05B2  5011     MOVF encoderSteps, W, ACCESS
+05B4  6E2E     MOVWF 0x2E, ACCESS
+05B6  6A2F     CLRF 0x2F, ACCESS
+05B8  BE2E     BTFSC 0x2E, 7, ACCESS
+05BA  062F     DECF 0x2F, F, ACCESS
+05BC  D00D     BRA 0x5D8
+05BE  C011     MOVFF encoderSteps, __pcstackCOMRAM
+05C0  F02A     NOP
+05C2  6A2B     CLRF i2c_data, ACCESS
+05C4  BE2A     BTFSC __pcstackCOMRAM, 7, ACCESS
+05C6  062B     DECF i2c_data, F, ACCESS
+05C8  1E2A     COMF __pcstackCOMRAM, F, ACCESS
+05CA  1E2B     COMF i2c_data, F, ACCESS
+05CC  4A2A     INFSNZ __pcstackCOMRAM, F, ACCESS
+05CE  2A2B     INCF i2c_data, F, ACCESS
+05D0  C02A     MOVFF __pcstackCOMRAM, 0x2E
+05D2  F02E     NOP
+05D4  C02B     MOVFF i2c_data, 0x2F
+05D6  F02F     NOP
+05D8  502E     MOVF 0x2E, W, ACCESS
+05DA  5C2C     SUBWF completion_code, W, ACCESS
+05DC  502D     MOVF 0x2D, W, ACCESS
+05DE  0A80     XORLW 0x80
+05E0  6E2A     MOVWF __pcstackCOMRAM, ACCESS
+05E2  502F     MOVF 0x2F, W, ACCESS
+05E4  0A80     XORLW 0x80
+05E6  582A     SUBWFB __pcstackCOMRAM, W, ACCESS
+05E8  B0D8     BTFSC STATUS, 0, ACCESS
+05EA  0012     RETURN 0
+05EC  D7D6     BRA 0x59A
+68:                }
+69:                //    IO_RB5_SetLow();
+70:            }
+71:            
+72:            void DecodePushEncoder(void) {
+73:                uint8_t testByte[2] = {0xaa, 0x55};
+0312  C046     MOVFF F11707, __pcstackBANK1
+0314  F100     NOP
+0316  C047     MOVFF 0x47, 0x101
+0318  F101     NOP
+74:                I2C1_MESSAGE_STATUS status;
+75:            
+76:                //        if (I2C1_MasterQueueIsEmpty() && buttonState != 0) {
+77:                //            I2C1_MasterWrite(testByte, 2, 0x10 + buttonState, &status);
+78:                //            buttonState = 0;
+79:                //        }
+80:            
+81:                if (I2C1_MasterQueueIsEmpty() && encoderSteps != 0) {
+031A  EC23     CALL 0xA46, 0
+031C  F005     NOP
+031E  0900     IORLW 0x0
+0320  B4D8     BTFSC STATUS, 2, ACCESS
+0322  0012     RETURN 0
+0324  5011     MOVF encoderSteps, W, ACCESS
+0326  B4D8     BTFSC STATUS, 2, ACCESS
+0328  0012     RETURN 0
+82:                    if (encoderSteps >= 4) {
+032A  5011     MOVF encoderSteps, W, ACCESS
+032C  0A80     XORLW 0x80
+032E  0F7C     ADDLW 0x7C
+0330  A0D8     BTFSS STATUS, 0, ACCESS
+0332  D034     BRA 0x39C
+83:                        encoderSteps -= 4;
+0334  0EFC     MOVLW 0xFC
+0336  2611     ADDWF encoderSteps, F, ACCESS
+84:                        if (encoderPeriod < 150u) {
+0338  0E96     MOVLW 0x96
+033A  6010     CPFSLT encoderPeriod, ACCESS
+033C  D017     BRA 0x36C
+85:                            I2C1_MasterWrite(testByte, 2, 0x09, &status);
+033E  0E00     MOVLW 0x0
+0340  0100     MOVLB 0x0
+0342  6FF9     MOVWF pdata, BANKED
+0344  0E01     MOVLW 0x1
+0346  0100     MOVLB 0x0
+0348  6FFA     MOVWF 0xFA, BANKED
+034A  0E02     MOVLW 0x2
+034C  0100     MOVLB 0x0
+034E  6FFB     MOVWF length, BANKED
+0350  0E00     MOVLW 0x0
+0352  0100     MOVLB 0x0
+0354  6FFD     MOVWF 0xFD, BANKED
+0356  0E09     MOVLW 0x9
+0358  6FFC     MOVWF address, BANKED
+035A  0E02     MOVLW 0x2
+035C  0100     MOVLB 0x0
+035E  6FFE     MOVWF pflag, BANKED
+0360  0E01     MOVLW 0x1
+0362  0100     MOVLB 0x0
+0364  6FFF     MOVWF 0xFF, BANKED
+0366  ECFF     CALL 0x7FE, 0
+0368  F003     NOP
+86:                        } else {
+036A  D016     BRA 0x398
+87:                            I2C1_MasterWrite(testByte, 2, 0x08, &status);
+036C  0E00     MOVLW 0x0
+036E  0100     MOVLB 0x0
+0370  6FF9     MOVWF pdata, BANKED
+0372  0E01     MOVLW 0x1
+0374  0100     MOVLB 0x0
+0376  6FFA     MOVWF 0xFA, BANKED
+0378  0E02     MOVLW 0x2
+037A  0100     MOVLB 0x0
+037C  6FFB     MOVWF length, BANKED
+037E  0E00     MOVLW 0x0
+0380  0100     MOVLB 0x0
+0382  6FFD     MOVWF 0xFD, BANKED
+0384  0E08     MOVLW 0x8
+0386  6FFC     MOVWF address, BANKED
+0388  0E02     MOVLW 0x2
+038A  0100     MOVLB 0x0
+038C  6FFE     MOVWF pflag, BANKED
+038E  0E01     MOVLW 0x1
+0390  0100     MOVLB 0x0
+0392  6FFF     MOVWF 0xFF, BANKED
+0394  ECFF     CALL 0x7FE, 0
+0396  F003     NOP
+88:                        }
+89:                        encoderPeriod = 0;
+0398  0E00     MOVLW 0x0
+039A  6E10     MOVWF encoderPeriod, ACCESS
+90:                    }
+91:                    if (encoderSteps <= -4) {
+039C  5011     MOVF encoderSteps, W, ACCESS
+039E  0A80     XORLW 0x80
+03A0  0F83     ADDLW 0x83
+03A2  B0D8     BTFSC STATUS, 0, ACCESS
+03A4  0012     RETURN 0
+92:                        encoderSteps += 4;
+03A6  0E04     MOVLW 0x4
+03A8  2611     ADDWF encoderSteps, F, ACCESS
+93:                        if (encoderPeriod < 150u) {
+03AA  0E96     MOVLW 0x96
+03AC  6010     CPFSLT encoderPeriod, ACCESS
+03AE  D017     BRA 0x3DE
+94:                            I2C1_MasterWrite(testByte, 2, 0x01, &status);
+03B0  0E00     MOVLW 0x0
+03B2  0100     MOVLB 0x0
+03B4  6FF9     MOVWF pdata, BANKED
+03B6  0E01     MOVLW 0x1
+03B8  0100     MOVLB 0x0
+03BA  6FFA     MOVWF 0xFA, BANKED
+03BC  0E02     MOVLW 0x2
+03BE  0100     MOVLB 0x0
+03C0  6FFB     MOVWF length, BANKED
+03C2  0E00     MOVLW 0x0
+03C4  0100     MOVLB 0x0
+03C6  6FFD     MOVWF 0xFD, BANKED
+03C8  0E01     MOVLW 0x1
+03CA  6FFC     MOVWF address, BANKED
+03CC  0E02     MOVLW 0x2
+03CE  0100     MOVLB 0x0
+03D0  6FFE     MOVWF pflag, BANKED
+03D2  0E01     MOVLW 0x1
+03D4  0100     MOVLB 0x0
+03D6  6FFF     MOVWF 0xFF, BANKED
+03D8  ECFF     CALL 0x7FE, 0
+03DA  F003     NOP
+95:                        } else {
+03DC  D016     BRA 0x40A
+96:                            I2C1_MasterWrite(testByte, 2, 0x00, &status);
+03DE  0E00     MOVLW 0x0
+03E0  0100     MOVLB 0x0
+03E2  6FF9     MOVWF pdata, BANKED
+03E4  0E01     MOVLW 0x1
+03E6  0100     MOVLB 0x0
+03E8  6FFA     MOVWF 0xFA, BANKED
+03EA  0E02     MOVLW 0x2
+03EC  0100     MOVLB 0x0
+03EE  6FFB     MOVWF length, BANKED
+03F0  0E00     MOVLW 0x0
+03F2  0100     MOVLB 0x0
+03F4  6FFD     MOVWF 0xFD, BANKED
+03F6  0E00     MOVLW 0x0
+03F8  6FFC     MOVWF address, BANKED
+03FA  0E02     MOVLW 0x2
+03FC  0100     MOVLB 0x0
+03FE  6FFE     MOVWF pflag, BANKED
+0400  0E01     MOVLW 0x1
+0402  0100     MOVLB 0x0
+0404  6FFF     MOVWF 0xFF, BANKED
+0406  ECFF     CALL 0x7FE, 0
+0408  F003     NOP
+97:                        }
+98:                        encoderPeriod = 0;
+040A  0E00     MOVLW 0x0
+040C  6E10     MOVWF encoderPeriod, ACCESS
+99:                    }
+040E  0012     RETURN 0
+100:               }
+101:           }

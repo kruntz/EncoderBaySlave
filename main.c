@@ -45,6 +45,7 @@
 
 #include "mcc_generated_files/mcc.h"
 #include "encoder.h"
+#include "leds.h"
 
 /*
                          Main application
@@ -82,6 +83,8 @@ void main(void) {
 
     // Disable the Peripheral Interrupts
     //INTERRUPT_PeripheralInterruptDisable();
+
+    LEDS_Initialize();
 
     while (1) {
         DecodePushEncoder();
