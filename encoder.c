@@ -23,9 +23,9 @@ Transition  Valid?  Move
 15  1111	No      0
  */
 
-int8_t buttonState = 0;
-int8_t encoderSteps = 0;
-uint8_t encoderPeriod = 0;
+volatile int8_t buttonState = 0;
+volatile int8_t encoderSteps = 0;
+volatile uint8_t encoderPeriod = 0;
 
 void TMR0_EncoderInterruptHandler(void) {
     IO_RB4_Toggle();

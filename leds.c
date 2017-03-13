@@ -23,7 +23,6 @@ void LEDS_Initialize(void) {
 
     __delay_ms(1);
 
-    // FIXME: inverted not working
     // MODE2: Output logic state inverted, All pin's outputs are configured in open drain mode
     LEDS_WriteReg(I2C_ADDRESS_9685_01, REG_MODE2, 0x10);
     // LEDS_WriteReg(I2C_ADDRESS_9685_02, REG_MODE2, 0x10);
