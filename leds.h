@@ -4,7 +4,7 @@
 // I2C bus addresses
 #define I2C_ADDRESS_9685_01 0x40
 #define I2C_ADDRESS_9685_02 0x41
-#define I2C_ADDRESS_RESET   0x00  // A write of 0x06 to this address will reset the 9685s
+#define I2C_ADDRESS_RESET   0x00  // Writing 0x06 to this address will reset the 9685s
 #define PCA9685_RESET       0x06
 
 // 9685 control registers
@@ -32,5 +32,7 @@
     LEDS_Initialize();
  */
 void LEDS_Initialize(void);
+
+void LEDS_WriteReg(uint8_t address, uint8_t reg, uint8_t value);
 
 #endif	/* LEDS_H */

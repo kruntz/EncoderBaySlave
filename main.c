@@ -54,8 +54,12 @@ void main(void) {
     // Initialize the device
     SYSTEM_Initialize();
 
+    IO_RB5_SetLow();
+    __delay_ms(2);
+    IO_RB5_SetHigh();
+
     TMR0_SetInterruptHandler(TMR0_EncoderInterruptHandler);
-    
+
     // If using interrupts in PIC18 High/Low Priority Mode you need to enable the Global High and Low Interrupts
     // If using interrupts in PIC Mid-Range Compatibility Mode you need to enable the Global and Peripheral Interrupts
     // Use the following macros to:
@@ -83,6 +87,9 @@ void main(void) {
 
     // Disable the Peripheral Interrupts
     //INTERRUPT_PeripheralInterruptDisable();
+
+    __delay_ms(100);
+    IO_RB5_SetLow();
 
     LEDS_Initialize();
 

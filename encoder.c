@@ -1,5 +1,6 @@
 #include "mcc_generated_files/mcc.h"
 #include "encoder.h"
+#include "leds.h"
 
 /*
  * Quadrature encoder transition table
@@ -56,8 +57,7 @@ void TMR0_EncoderInterruptHandler(void) {
         encoderPeriod++;
     }
 
-    int i;
-    for (i = 0; i < (encoderSteps < 0 ? (-encoderSteps) : encoderSteps); i++) {
+    for (int i = 0; i < (encoderSteps < 0 ? (-encoderSteps) : encoderSteps); i++) {
         IO_RB5_SetHigh();
         Nop();
         Nop();
@@ -71,31 +71,46 @@ void TMR0_EncoderInterruptHandler(void) {
 }
 
 void DecodePushEncoder(void) {
-    uint8_t testByte[2] = {0xaa, 0x55};
-    I2C1_MESSAGE_STATUS status;
+    static int rgb = 0;
+    static uint8_t ledsRegs[3] = {0x09, 0x0d, 0x11};
+    static uint8_t ledsOffH[3];
 
-    //        if (I2C1_MasterQueueIsEmpty() && buttonState != 0) {
-    //            I2C1_MasterWrite(testByte, 2, 0x10 + buttonState, &status);
-    //            buttonState = 0;
-    //        }
+    if (buttonState != 0) {
+        rgb++;
+        if (rgb > 2) {
+            rgb = 0;
+        }
+        buttonState = 0;
+    }
 
-    if (I2C1_MasterQueueIsEmpty() && encoderSteps != 0) {
+    if (encoderSteps != 0) {
         if (encoderSteps >= 4) {
             encoderSteps -= 4;
-            if (encoderPeriod < SPEEDY_INTERVAL) {
-//                I2C1_MasterWrite(testByte, 2, 0x09, &status);
-            } else {
-//                I2C1_MasterWrite(testByte, 2, 0x08, &status);
+            //            if (encoderPeriod < SPEEDY_INTERVAL) {
+            //            } else {
+            //            }
+
+            ledsOffH[rgb] = ledsOffH[rgb] + 1;
+            if (ledsOffH[rgb] > 0x0f) {
+                ledsOffH[rgb] = 0x00;
             }
+            LEDS_WriteReg(I2C_ADDRESS_9685_01, ledsRegs[rgb], ledsOffH[rgb]);
+
             encoderPeriod = 0;
         }
         if (encoderSteps <= -4) {
             encoderSteps += 4;
-            if (encoderPeriod < SPEEDY_INTERVAL) {
-//                I2C1_MasterWrite(testByte, 2, 0x01, &status);
+            //            if (encoderPeriod < SPEEDY_INTERVAL) {
+            //            } else {
+            //            }
+
+            if (ledsOffH[rgb] == 0x00) {
+                ledsOffH[rgb] = 0x0f;
             } else {
-//                I2C1_MasterWrite(testByte, 2, 0x00, &status);
+                ledsOffH[rgb] = ledsOffH[rgb] - 1;
             }
+            LEDS_WriteReg(I2C_ADDRESS_9685_01, ledsRegs[rgb], ledsOffH[rgb]);
+
             encoderPeriod = 0;
         }
     }
