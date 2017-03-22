@@ -58,3 +58,10 @@ void LEDS_Initialize(void) {
 
     __delay_ms(1);
 }
+
+void LEDS_Shutdown(void) {
+    I2C1_MESSAGE_STATUS status;
+    
+    LEDS_WriteReg(I2C_ADDRESS_9685_01, REG_ALL_LED_OFF_H, 0x10);
+    // LEDS_WriteReg(I2C_ADDRESS_9685_02, REG_ALL_LED_OFF_H, 0x10);
+}

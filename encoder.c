@@ -51,7 +51,7 @@ void TMR0_EncoderInterruptHandler(void) {
     // Add actual state
     oldEncoderState |= (ENC_00_B_GetValue());
     oldEncoderState |= (ENC_00_A_GetValue() << 1);
-    // Indexed state (de-bounce with at least two consecutive identical states)
+    // Indexed state (de-bounce with quadrature code)
     encoderSteps += encoderStates[(oldEncoderState & 0x0f)];
     if (encoderPeriod < UINT8_MAX) {
         encoderPeriod++;

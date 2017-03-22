@@ -27,12 +27,38 @@
  * @Returns
     none
  * @Description
-    Initialize PCA9685 Led drivers
+    Initialize PCA9685 Led driver
  * @Example
     LEDS_Initialize();
  */
 void LEDS_Initialize(void);
 
+/**
+ * @Param
+    none
+ * @Returns
+    none
+ * @Description
+    Turn off all leds
+ * @Example
+    LEDS_Shutdown();
+ */
+void LEDS_Shutdown(void);
+
+/**
+ * @Param
+    address - I2C peripheral to be accessed
+ * @Param
+    reg - Register address
+ * @Param
+    value - Register content required
+ * @Returns
+    none
+ * @Description
+    Write a byte value into a device register
+ * @Example
+    LEDS_WriteReg();
+ */
 void LEDS_WriteReg(uint8_t address, uint8_t reg, uint8_t value);
 
 #endif	/* LEDS_H */
