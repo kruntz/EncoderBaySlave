@@ -1,67 +1,63 @@
 #include "mcc_generated_files/mcc.h"
 #include "leds.h"
 
-void LEDS_WriteReg(uint8_t address, uint8_t reg, uint8_t value) {
-    uint8_t p_data[2];
-    I2C1_MESSAGE_STATUS status;
+#define TLC_5947_CHANNELS   COLORS * 8
+#define TLC_5947_PWM_BITS   12
 
-    p_data[0] = reg;
-    p_data[1] = value;
-    while (I2C1_MasterQueueIsFull() == true);
-    I2C1_MasterWrite(p_data, 2, address, &status);
-    while (status != I2C1_MESSAGE_COMPLETE);
+static uint16_t pwmTable[3 * 8]; // RGB PWM values for 8 leds
+
+void LEDS_RGB(uint8_t led, uint16_t red, uint16_t green, uint16_t blue) {
+    // 12 bits left aligned in a 16 bit word to save time during SPI bit banging
+    pwmTable[led * COLORS + RED] = red << 4;
+    pwmTable[led * COLORS + GREEN] = green << 4;
+    pwmTable[led * COLORS + BLUE] = blue << 4;
+}
+
+void LEDS_Color(uint8_t led, uint8_t color, uint16_t pwm) {
+    // 12 bits left aligned in a 16 bit word to save time during SPI bit banging
+    pwmTable[led * COLORS + color] = pwm << 4;
 }
 
 void LEDS_Initialize(void) {
-    I2C1_MESSAGE_STATUS status;
-
-    // Reset both 9685s
-    uint8_t reset[1] = {PCA9685_RESET};
-    while (I2C1_MasterQueueIsFull() == true);
-    I2C1_MasterWrite(reset, 1, I2C_ADDRESS_RESET, &status);
-    while (status != I2C1_MESSAGE_COMPLETE);
-
-    __delay_ms(1);
-
-    // MODE2: Output logic state inverted, All pin's outputs are configured in open drain mode
-    LEDS_WriteReg(I2C_ADDRESS_9685_01, REG_MODE2, 0x10);
-    // LEDS_WriteReg(I2C_ADDRESS_9685_02, REG_MODE2, 0x10);
-
-    // MODE1: Does not respond to LED all-call I2C address. Do not SLEEP
-    LEDS_WriteReg(I2C_ADDRESS_9685_01, REG_MODE1, 0x00);
-    // LEDS_WriteReg(I2C_ADDRESS_9685_02, REG_MODE1, 0x00);
-
-    __delay_ms(1);
-
-    //    uint8_t init9685_3[1] = {0x00};
-    //    while (I2C1_MasterQueueIsFull() == true);
-    //    I2C1_MasterRead(init9685_3, 1, I2C_ADDRESS_9685_01, &status);
-    //    while (status != I2C1_MESSAGE_COMPLETE);
-
-    // MODE1: Set SLEEP mode, to change PRE_SCALE register
-    LEDS_WriteReg(I2C_ADDRESS_9685_01, REG_MODE1, 0x10);
-    // LEDS_WriteReg(I2C_ADDRESS_9685_02, REG_MODE1, 0x10);
-
-    // PRE_SCALE: Set 200Hz refresh
-    LEDS_WriteReg(I2C_ADDRESS_9685_01, REG_PRE_SCALE, 0x1e);
-    // LEDS_WriteReg(I2C_ADDRESS_9685_02, REG_PRE_SCALE, 0x1e);
-
-    // MODE1: Exit SLEEP mode
-    LEDS_WriteReg(I2C_ADDRESS_9685_01, REG_MODE1, 0x00);
-    // LEDS_WriteReg(I2C_ADDRESS_9685_02, REG_MODE1, 0x00);
-
-    __delay_ms(1);
-
-    // MODE1: Restart
-    LEDS_WriteReg(I2C_ADDRESS_9685_01, REG_MODE1, 0x80);
-    // LEDS_WriteReg(I2C_ADDRESS_9685_02, REG_MODE1, 0x80);
-
-    __delay_ms(1);
+    for (uint8_t i = 0; i < TLC_5947_CHANNELS; i++) {
+        pwmTable[i] = 0x0000u;
+    }
+    TLC_5947_BLANK_SetLow(); // Enable output
 }
 
 void LEDS_Shutdown(void) {
-    I2C1_MESSAGE_STATUS status;
-    
-    LEDS_WriteReg(I2C_ADDRESS_9685_01, REG_ALL_LED_OFF_H, 0x10);
-    // LEDS_WriteReg(I2C_ADDRESS_9685_02, REG_ALL_LED_OFF_H, 0x10);
+    TLC_5947_BLANK_SetHigh(); // Disable output
+}
+
+void LEDS_Tx_Buffer(void) {
+    uint16_t pwm; // 12 bit channel PWM value
+    uint8_t chBit; // bit pointer for SPI, MSB first (11 -> 0)
+    uint8_t channel; // channel pointer for SPI, last channel first (23 -> 0)
+
+    IO_RB5_SetHigh(); // Debug signaling
+
+    channel = TLC_5947_CHANNELS - 1; // Last channel first
+    do {
+        pwm = pwmTable[channel];
+        chBit = TLC_5947_PWM_BITS;
+        do {
+            // Slightly asymmetric (2 or 3 instructions) but averages one instruction less per bit,
+            // marks bits on a 'scope trace and leaves SIN low at the end ov the word.
+            TLC_5947_SIN_SetLow(); // SPI bit banging
+            if (pwm & 0x8000u) {
+                TLC_5947_SIN_SetHigh(); // SPI bit banging
+            } 
+
+            TLC_5947_SCLK_SetHigh(); // SPI bit banging
+            pwm <<= 1;
+            TLC_5947_SCLK_SetLow(); // SPI bit banging
+        } while (--chBit > 0);
+    } while (--channel >= 0);
+
+    TLC_5947_BLANK_SetHigh(); // Disable output
+    TLC_5947_XLAT_SetHigh(); // Latch new pwm values
+    TLC_5947_XLAT_SetLow();
+    TLC_5947_BLANK_SetLow(); // Enable output
+
+    IO_RB5_SetLow(); // Debug signaling
 }

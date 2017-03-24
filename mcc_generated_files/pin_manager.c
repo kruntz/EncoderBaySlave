@@ -53,7 +53,7 @@ void PIN_MANAGER_Initialize(void)
     /**
     LATx registers
     */   
-    LATE = 0x00;    
+    LATE = 0x02;    
     LATD = 0x00;    
     LATA = 0x00;    
     LATB = 0x00;    
@@ -62,9 +62,9 @@ void PIN_MANAGER_Initialize(void)
     /**
     TRISx registers
     */    
-    TRISE = 0x07;
+    TRISE = 0x04;
     TRISA = 0xFF;
-    TRISB = 0xCF;
+    TRISB = 0xC3;
     TRISC = 0xFF;
     TRISD = 0xFF;
 
@@ -74,7 +74,7 @@ void PIN_MANAGER_Initialize(void)
     ANSELC = 0x00;
     ANSELB = 0xC0;
     ANSELD = 0x00;
-    ANSELE = 0x07;
+    ANSELE = 0x04;
     ANSELA = 0x00;
 
     /**
@@ -82,7 +82,7 @@ void PIN_MANAGER_Initialize(void)
     */ 
     WPUD = 0xFF;
     WPUE = 0x00;
-    WPUB = 0x0F;
+    WPUB = 0x03;
     WPUA = 0x00;
     WPUC = 0xFF;
 
@@ -106,13 +106,9 @@ void PIN_MANAGER_Initialize(void)
     PPSLOCK = 0xAA;
     PPSLOCKbits.PPSLOCKED = 0x00; // unlock PPS
 
-    RB1PPS = 0x10;   //RB1->MSSP1:SDA1;
-    SSP2CLKPPSbits.SSPCLKPPS = 0x0A;   //RB2->MSSP2:SCL2;
-    SSP2DATPPSbits.SSPDATPPS = 0x0B;   //RB3->MSSP2:SDA2;
-    RB0PPS = 0x0F;   //RB0->MSSP1:SCL1;
-    RB2PPS = 0x11;   //RB2->MSSP2:SCL2;
-    RB3PPS = 0x12;   //RB3->MSSP2:SDA2;
     SSP1CLKPPSbits.SSPCLKPPS = 0x08;   //RB0->MSSP1:SCL1;
+    RB1PPS = 0x10;   //RB1->MSSP1:SDA1;
+    RB0PPS = 0x0F;   //RB0->MSSP1:SCL1;
     SSP1DATPPSbits.SSPDATPPS = 0x09;   //RB1->MSSP1:SDA1;
 
     PPSLOCK = 0x55;

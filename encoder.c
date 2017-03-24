@@ -24,12 +24,14 @@ Transition  Valid?  Move
  */
 
 volatile int8_t buttonState = 0;
+volatile uint8_t buttonPressed = 0;
 volatile int8_t encoderSteps = 0;
 volatile uint8_t encoderPeriod = 0;
 
+static int rgb = 0;
+
 void TMR0_EncoderInterruptHandler(void) {
     IO_RB4_Toggle();
-    //    IO_RB5_SetHigh();
 
     // ---------- Read button state
     static int8_t buttonStates[] = {0, 0, 0, 1, -1, 0, 0, 0};
@@ -41,6 +43,9 @@ void TMR0_EncoderInterruptHandler(void) {
     oldButtonState |= ENC_00_P_GetValue();
     // Indexed state (de-bounce with at least two consecutive identical states)
     buttonState = buttonStates[(oldButtonState & 0x07)];
+    if (buttonState == 1) {
+        buttonPressed = 1;
+    }
 
     // ---------- Read encoder state
     static int8_t encoderStates[] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0};
@@ -57,7 +62,8 @@ void TMR0_EncoderInterruptHandler(void) {
         encoderPeriod++;
     }
 
-    for (int i = 0; i < (encoderSteps < 0 ? (-encoderSteps) : encoderSteps); i++) {
+//    for (int i = 0; i < (encoderSteps < 0 ? (-encoderSteps) : encoderSteps); i++) {
+    for (int i = 0; i <= rgb; i++) {
         IO_RB5_SetHigh();
         Nop();
         Nop();
@@ -67,20 +73,19 @@ void TMR0_EncoderInterruptHandler(void) {
         Nop();
         Nop();
     }
-    //    IO_RB5_SetLow();
+
+    LEDS_Tx_Buffer();
 }
 
 void DecodePushEncoder(void) {
-    static int rgb = 0;
-    static uint8_t ledsRegs[3] = {0x09, 0x0d, 0x11};
-    static uint8_t ledsOffH[3];
+    static uint8_t led0hi[3];
 
-    if (buttonState != 0) {
+    if (buttonPressed) {
         rgb++;
         if (rgb > 2) {
             rgb = 0;
         }
-        buttonState = 0;
+        buttonPressed = 0;
     }
 
     if (encoderSteps != 0) {
@@ -90,13 +95,13 @@ void DecodePushEncoder(void) {
             //            } else {
             //            }
 
-            ledsOffH[rgb] = ledsOffH[rgb] + 1;
-            if (ledsOffH[rgb] > 0x0f) {
-                ledsOffH[rgb] = 0x00;
+            led0hi[rgb] = led0hi[rgb] + 1;
+            if (led0hi[rgb] > 0x0f) {
+                led0hi[rgb] = 0x00;
             }
-            LEDS_WriteReg(I2C_ADDRESS_9685_01, ledsRegs[rgb], ledsOffH[rgb]);
+            LEDS_Color(0, rgb, led0hi[rgb] << 8);
 
-            encoderPeriod = 0;
+                    //            encoderPeriod = 0;
         }
         if (encoderSteps <= -4) {
             encoderSteps += 4;
@@ -104,14 +109,14 @@ void DecodePushEncoder(void) {
             //            } else {
             //            }
 
-            if (ledsOffH[rgb] == 0x00) {
-                ledsOffH[rgb] = 0x0f;
+            if (led0hi[rgb] == 0x00) {
+                led0hi[rgb] = 0x0f;
             } else {
-                ledsOffH[rgb] = ledsOffH[rgb] - 1;
+                led0hi[rgb] = led0hi[rgb] - 1;
             }
-            LEDS_WriteReg(I2C_ADDRESS_9685_01, ledsRegs[rgb], ledsOffH[rgb]);
+            LEDS_Color(0, rgb, led0hi[rgb] << 8);
 
-            encoderPeriod = 0;
+                    //            encoderPeriod = 0;
         }
     }
 }

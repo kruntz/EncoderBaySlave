@@ -53,6 +53,7 @@
 void main(void) {
     // Initialize the device
     SYSTEM_Initialize();
+    LEDS_Initialize();
 
     IO_RB5_SetLow();
     __delay_ms(2);
@@ -90,8 +91,6 @@ void main(void) {
 
     __delay_ms(100);
     IO_RB5_SetLow();
-
-    LEDS_Initialize();
 
     while (1) {
         DecodePushEncoder();

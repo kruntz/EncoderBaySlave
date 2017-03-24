@@ -243,29 +243,45 @@
 #define RB1_SetAnalogMode() do { ANSELBbits.ANSELB1 = 1; } while(0)
 #define RB1_SetDigitalMode()do { ANSELBbits.ANSELB1 = 0; } while(0)
 
-// get/set RB2 procedures
-#define RB2_SetHigh()    do { LATBbits.LATB2 = 1; } while(0)
-#define RB2_SetLow()   do { LATBbits.LATB2 = 0; } while(0)
-#define RB2_Toggle()   do { LATBbits.LATB2 = ~LATBbits.LATB2; } while(0)
-#define RB2_GetValue()         PORTBbits.RB2
-#define RB2_SetDigitalInput()   do { TRISBbits.TRISB2 = 1; } while(0)
-#define RB2_SetDigitalOutput()  do { TRISBbits.TRISB2 = 0; } while(0)
-#define RB2_SetPullup()     do { WPUBbits.WPUB2 = 1; } while(0)
-#define RB2_ResetPullup()   do { WPUBbits.WPUB2 = 0; } while(0)
-#define RB2_SetAnalogMode() do { ANSELBbits.ANSELB2 = 1; } while(0)
-#define RB2_SetDigitalMode()do { ANSELBbits.ANSELB2 = 0; } while(0)
+// get/set TLC_5947_SCLK aliases
+#define TLC_5947_SCLK_TRIS               TRISBbits.TRISB2
+#define TLC_5947_SCLK_LAT                LATBbits.LATB2
+#define TLC_5947_SCLK_PORT               PORTBbits.RB2
+#define TLC_5947_SCLK_WPU                WPUBbits.WPUB2
+#define TLC_5947_SCLK_OD                ODCONBbits.ODCB2
+#define TLC_5947_SCLK_ANS                ANSELBbits.ANSELB2
+#define TLC_5947_SCLK_SetHigh()            do { LATBbits.LATB2 = 1; } while(0)
+#define TLC_5947_SCLK_SetLow()             do { LATBbits.LATB2 = 0; } while(0)
+#define TLC_5947_SCLK_Toggle()             do { LATBbits.LATB2 = ~LATBbits.LATB2; } while(0)
+#define TLC_5947_SCLK_GetValue()           PORTBbits.RB2
+#define TLC_5947_SCLK_SetDigitalInput()    do { TRISBbits.TRISB2 = 1; } while(0)
+#define TLC_5947_SCLK_SetDigitalOutput()   do { TRISBbits.TRISB2 = 0; } while(0)
+#define TLC_5947_SCLK_SetPullup()      do { WPUBbits.WPUB2 = 1; } while(0)
+#define TLC_5947_SCLK_ResetPullup()    do { WPUBbits.WPUB2 = 0; } while(0)
+#define TLC_5947_SCLK_SetPushPull()    do { ODCONBbits.ODCB2 = 1; } while(0)
+#define TLC_5947_SCLK_SetOpenDrain()   do { ODCONBbits.ODCB2 = 0; } while(0)
+#define TLC_5947_SCLK_SetAnalogMode()  do { ANSELBbits.ANSELB2 = 1; } while(0)
+#define TLC_5947_SCLK_SetDigitalMode() do { ANSELBbits.ANSELB2 = 0; } while(0)
 
-// get/set RB3 procedures
-#define RB3_SetHigh()    do { LATBbits.LATB3 = 1; } while(0)
-#define RB3_SetLow()   do { LATBbits.LATB3 = 0; } while(0)
-#define RB3_Toggle()   do { LATBbits.LATB3 = ~LATBbits.LATB3; } while(0)
-#define RB3_GetValue()         PORTBbits.RB3
-#define RB3_SetDigitalInput()   do { TRISBbits.TRISB3 = 1; } while(0)
-#define RB3_SetDigitalOutput()  do { TRISBbits.TRISB3 = 0; } while(0)
-#define RB3_SetPullup()     do { WPUBbits.WPUB3 = 1; } while(0)
-#define RB3_ResetPullup()   do { WPUBbits.WPUB3 = 0; } while(0)
-#define RB3_SetAnalogMode() do { ANSELBbits.ANSELB3 = 1; } while(0)
-#define RB3_SetDigitalMode()do { ANSELBbits.ANSELB3 = 0; } while(0)
+// get/set TLC_5947_SIN aliases
+#define TLC_5947_SIN_TRIS               TRISBbits.TRISB3
+#define TLC_5947_SIN_LAT                LATBbits.LATB3
+#define TLC_5947_SIN_PORT               PORTBbits.RB3
+#define TLC_5947_SIN_WPU                WPUBbits.WPUB3
+#define TLC_5947_SIN_OD                ODCONBbits.ODCB3
+#define TLC_5947_SIN_ANS                ANSELBbits.ANSELB3
+#define TLC_5947_SIN_SetHigh()            do { LATBbits.LATB3 = 1; } while(0)
+#define TLC_5947_SIN_SetLow()             do { LATBbits.LATB3 = 0; } while(0)
+#define TLC_5947_SIN_Toggle()             do { LATBbits.LATB3 = ~LATBbits.LATB3; } while(0)
+#define TLC_5947_SIN_GetValue()           PORTBbits.RB3
+#define TLC_5947_SIN_SetDigitalInput()    do { TRISBbits.TRISB3 = 1; } while(0)
+#define TLC_5947_SIN_SetDigitalOutput()   do { TRISBbits.TRISB3 = 0; } while(0)
+#define TLC_5947_SIN_SetPullup()      do { WPUBbits.WPUB3 = 1; } while(0)
+#define TLC_5947_SIN_ResetPullup()    do { WPUBbits.WPUB3 = 0; } while(0)
+#define TLC_5947_SIN_SetPushPull()    do { ODCONBbits.ODCB3 = 1; } while(0)
+#define TLC_5947_SIN_SetOpenDrain()   do { ODCONBbits.ODCB3 = 0; } while(0)
+#define TLC_5947_SIN_SetAnalogMode()  do { ANSELBbits.ANSELB3 = 1; } while(0)
+#define TLC_5947_SIN_SetDigitalMode() do { ANSELBbits.ANSELB3 = 0; } while(0)
 
 // get/set IO_RB4 aliases
 #define IO_RB4_TRIS               TRISBbits.TRISB4
@@ -626,6 +642,46 @@
 #define ENC_07_B_SetOpenDrain()   do { ODCONDbits.ODCD7 = 0; } while(0)
 #define ENC_07_B_SetAnalogMode()  do { ANSELDbits.ANSELD7 = 1; } while(0)
 #define ENC_07_B_SetDigitalMode() do { ANSELDbits.ANSELD7 = 0; } while(0)
+
+// get/set TLC_5947_XLAT aliases
+#define TLC_5947_XLAT_TRIS               TRISEbits.TRISE0
+#define TLC_5947_XLAT_LAT                LATEbits.LATE0
+#define TLC_5947_XLAT_PORT               PORTEbits.RE0
+#define TLC_5947_XLAT_WPU                WPUEbits.WPUE0
+#define TLC_5947_XLAT_OD                ODCONEbits.ODCE0
+#define TLC_5947_XLAT_ANS                ANSELEbits.ANSELE0
+#define TLC_5947_XLAT_SetHigh()            do { LATEbits.LATE0 = 1; } while(0)
+#define TLC_5947_XLAT_SetLow()             do { LATEbits.LATE0 = 0; } while(0)
+#define TLC_5947_XLAT_Toggle()             do { LATEbits.LATE0 = ~LATEbits.LATE0; } while(0)
+#define TLC_5947_XLAT_GetValue()           PORTEbits.RE0
+#define TLC_5947_XLAT_SetDigitalInput()    do { TRISEbits.TRISE0 = 1; } while(0)
+#define TLC_5947_XLAT_SetDigitalOutput()   do { TRISEbits.TRISE0 = 0; } while(0)
+#define TLC_5947_XLAT_SetPullup()      do { WPUEbits.WPUE0 = 1; } while(0)
+#define TLC_5947_XLAT_ResetPullup()    do { WPUEbits.WPUE0 = 0; } while(0)
+#define TLC_5947_XLAT_SetPushPull()    do { ODCONEbits.ODCE0 = 1; } while(0)
+#define TLC_5947_XLAT_SetOpenDrain()   do { ODCONEbits.ODCE0 = 0; } while(0)
+#define TLC_5947_XLAT_SetAnalogMode()  do { ANSELEbits.ANSELE0 = 1; } while(0)
+#define TLC_5947_XLAT_SetDigitalMode() do { ANSELEbits.ANSELE0 = 0; } while(0)
+
+// get/set TLC_5947_BLANK aliases
+#define TLC_5947_BLANK_TRIS               TRISEbits.TRISE1
+#define TLC_5947_BLANK_LAT                LATEbits.LATE1
+#define TLC_5947_BLANK_PORT               PORTEbits.RE1
+#define TLC_5947_BLANK_WPU                WPUEbits.WPUE1
+#define TLC_5947_BLANK_OD                ODCONEbits.ODCE1
+#define TLC_5947_BLANK_ANS                ANSELEbits.ANSELE1
+#define TLC_5947_BLANK_SetHigh()            do { LATEbits.LATE1 = 1; } while(0)
+#define TLC_5947_BLANK_SetLow()             do { LATEbits.LATE1 = 0; } while(0)
+#define TLC_5947_BLANK_Toggle()             do { LATEbits.LATE1 = ~LATEbits.LATE1; } while(0)
+#define TLC_5947_BLANK_GetValue()           PORTEbits.RE1
+#define TLC_5947_BLANK_SetDigitalInput()    do { TRISEbits.TRISE1 = 1; } while(0)
+#define TLC_5947_BLANK_SetDigitalOutput()   do { TRISEbits.TRISE1 = 0; } while(0)
+#define TLC_5947_BLANK_SetPullup()      do { WPUEbits.WPUE1 = 1; } while(0)
+#define TLC_5947_BLANK_ResetPullup()    do { WPUEbits.WPUE1 = 0; } while(0)
+#define TLC_5947_BLANK_SetPushPull()    do { ODCONEbits.ODCE1 = 1; } while(0)
+#define TLC_5947_BLANK_SetOpenDrain()   do { ODCONEbits.ODCE1 = 0; } while(0)
+#define TLC_5947_BLANK_SetAnalogMode()  do { ANSELEbits.ANSELE1 = 1; } while(0)
+#define TLC_5947_BLANK_SetDigitalMode() do { ANSELEbits.ANSELE1 = 0; } while(0)
 
 /**
    @Param

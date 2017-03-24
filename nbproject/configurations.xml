@@ -9,7 +9,6 @@
                      projectFiles="true">
         <itemPath>mcc_generated_files/interrupt_manager.h</itemPath>
         <itemPath>mcc_generated_files/pin_manager.h</itemPath>
-        <itemPath>mcc_generated_files/i2c2.h</itemPath>
         <itemPath>mcc_generated_files/mcc.h</itemPath>
         <itemPath>mcc_generated_files/tmr0.h</itemPath>
         <itemPath>mcc_generated_files/i2c1.h</itemPath>
@@ -31,7 +30,6 @@
         <itemPath>mcc_generated_files/tmr0.c</itemPath>
         <itemPath>mcc_generated_files/interrupt_manager.c</itemPath>
         <itemPath>mcc_generated_files/mcc.c</itemPath>
-        <itemPath>mcc_generated_files/i2c2.c</itemPath>
         <itemPath>mcc_generated_files/pin_manager.c</itemPath>
         <itemPath>mcc_generated_files/i2c1.c</itemPath>
         <itemPath>mcc_generated_files/memory.c</itemPath>
@@ -159,6 +157,7 @@
         <property key="ToolFirmwareFilePath"
                   value="Press to browse for a specific firmware version"/>
         <property key="ToolFirmwareOption.UseLatestFirmware" value="true"/>
+        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="true"/>
@@ -201,13 +200,6 @@
         <property key="stack-size-main" value="auto"/>
         <property key="stack-type" value="compiled"/>
       </XC8-config-global>
-      <mpasmsuite>
-        <property key="absolute-mode" value="false"/>
-        <property key="eeprom-width" value="8"/>
-        <property key="extended-mode" value="false"/>
-        <property key="extended-mode-mpasm" value="false"/>
-        <property key="extended-mode-mplink" value="false"/>
-      </mpasmsuite>
     </conf>
   </confs>
 </configurationDescriptor>
